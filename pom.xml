@@ -30,7 +30,7 @@
         <slf4j.version>1.5.8</slf4j.version>
         <spring.version>3.0.0.RC2</spring.version>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -120,7 +120,7 @@
             <version>1.8.0</version>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.integration</groupId>
             <!--<artifactId>spring-integration-file</artifactId>-->
@@ -183,4 +183,56 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <!--<repository>-->
+            <!--<id>ibilio</id>-->
+            <!--<url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>-->
+        <!--</repository>-->
+        <!--<repository>-->
+            <!--<id>springsource.repository.bundles.release</id>-->
+            <!--<url>http://repository.springsource.com/maven/bundles/release</url>-->
+        <!--</repository>-->
+        <repository>
+            <id>springsource.repository.release</id>
+            <url>http://repository.springsource.com/release</url>
+        </repository>
+    </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aop</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-tx</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>com.springsource.org.apache.commons.logging</artifactId>
+                <version>99.0-does-not-exist</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
 </project>

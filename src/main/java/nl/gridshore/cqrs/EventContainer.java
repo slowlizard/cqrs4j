@@ -61,7 +61,7 @@ public class EventContainer {
     }
 
     public EventStream getInputStream() {
-        return new SimpleEventStream(events);
+        return new SimpleEventStream(events, aggregateIdentifier);
     }
 
     public UUID getAggregateIdentifier() {
