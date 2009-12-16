@@ -28,7 +28,7 @@
 
     <properties>
         <slf4j.version>1.5.8</slf4j.version>
-        <spring.version>3.0.0.RC2</spring.version>
+        <spring.version>3.0.0.RC3</spring.version>
     </properties>
 
     <dependencies>
@@ -185,16 +185,21 @@
 
     <repositories>
         <!--<repository>-->
-            <!--<id>ibilio</id>-->
-            <!--<url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>-->
+        <!--<id>ibilio</id>-->
+        <!--<url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>-->
         <!--</repository>-->
         <!--<repository>-->
-            <!--<id>springsource.repository.bundles.release</id>-->
-            <!--<url>http://repository.springsource.com/maven/bundles/release</url>-->
+        <!--<id>springsource.repository.bundles.release</id>-->
+        <!--<url>http://repository.springsource.com/maven/bundles/release</url>-->
         <!--</repository>-->
         <repository>
             <id>springsource.repository.release</id>
             <url>http://repository.springsource.com/release</url>
+        </repository>
+        <repository>
+            <id>org.springsource.maven.snapshot</id>
+            <name>SpringSource Maven Central-compatible Snapshot Repository</name>
+            <url>http://maven.springframework.org/milestone</url>
         </repository>
     </repositories>
 
@@ -234,5 +239,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>
