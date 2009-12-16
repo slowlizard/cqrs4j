@@ -40,8 +40,14 @@ public class AbstractAnnotatedAggregateRootTest {
 
         assertEquals(1, testSubject.invocationCount);
 
-        testSubject.handle(new DomainEvent() {
-        });
+        try {
+            testSubject.handle(new DomainEvent() {
+            });
+            fail("Expected UnsupportedOperationException. There is no event handler for this aggregate.");
+        }
+        catch (UnsupportedOperationException e) {
+            // this is what we wanted
+        }
 
         assertEquals(1, testSubject.invocationCount);
     }

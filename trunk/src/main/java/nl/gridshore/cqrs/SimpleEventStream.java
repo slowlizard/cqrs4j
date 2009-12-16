@@ -30,6 +30,14 @@ public class SimpleEventStream implements EventStream {
     private Iterator<DomainEvent> iterator;
     private UUID identifier;
 
+    public SimpleEventStream(List<DomainEvent> domainEvents, UUID aggregateIdentifier) {
+        this.iterator = domainEvents.iterator();
+        if (iterator.hasNext()) {
+            nextEvent = iterator.next();
+        }
+        identifier = aggregateIdentifier;
+    }
+
     public SimpleEventStream(List<DomainEvent> domainEvents) {
         this.iterator = domainEvents.iterator();
         if (iterator.hasNext()) {
