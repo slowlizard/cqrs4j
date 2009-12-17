@@ -36,7 +36,20 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * Spring Bean post processor that automatically generates an adapter for each bean containing {@link
+ * nl.gridshore.cqrs.eventhandler.annotation.EventHandler} annotated methods.
+ * <p/>
+ * Optionally, this bean can be configured with an {@link org.springframework.core.task.AsyncTaskExecutor} that will be
+ * used by the adapters to register their pollers. This task executor must contain at least one thread per adapter
+ * created (meaning one per bean with {@link nl.gridshore.cqrs.eventhandler.annotation.EventHandler} annotation).
+ * <p/>
+ * Beans that already implement the {@link nl.gridshore.cqrs.eventhandler.EventHandler} interface are skipped, even if
+ * they contain a method with the {@link nl.gridshore.cqrs.eventhandler.annotation.EventHandler} annotation.
+ *
  * @author Allard Buijze
+ * @see nl.gridshore.cqrs.eventhandler.annotation.postprocessor.TransactionalAnnotationEventHandlerBeanPostProcessor
+ * @see nl.gridshore.cqrs.eventhandler.annotation.EventHandler
+ * @see nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventHandlerAdapter
  */
 public class AnnotationEventHandlerBeanPostProcessor
         implements BeanPostProcessor, ApplicationContextAware, DisposableBean {

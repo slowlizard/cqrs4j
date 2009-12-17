@@ -13,7 +13,17 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Specialization of the {@link nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventHandlerAdapter} that
+ * allows events to be handled transactionally. This requires the configuration of a {@link
+ * org.springframework.transaction.PlatformTransactionManager}.
+ * <p/>
+ * The event handler classes need to be marked as transactional. A handler is considered marked if the class or any of
+ * its methods are annotated with {@link org.springframework.transaction.annotation.Transactional}.
+ *
  * @author Allard Buijze
+ * @see org.springframework.transaction.annotation.Transactional
+ * @see nl.gridshore.cqrs.eventhandler.annotation.EventHandler
+ * @see nl.gridshore.cqrs.eventhandler.annotation.postprocessor.TransactionalAnnotationEventHandlerBeanPostProcessor
  */
 public class TransactionalAnnotationEventHandlerAdapter extends BufferingAnnotationEventHandlerAdapter {
 

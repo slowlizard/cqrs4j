@@ -30,6 +30,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * {@link AnnotationEventHandlerAdapter} implementation that buffers all incoming events into an internally managed
+ * queue. This allows the event providing thread to return immediately and continue processing. Event Handling is forced
+ * to run in another thread.
+ * <p/>
+ * This adapter is configured such that events are processed in exactly the order they are received in.
+ * <p/>
+ * On application context shutdown, this event handler will refuse any incoming events, but will continue processing
+ * until all events in the queue have been processed.
+ * <p/>
+ * By default, an internal task executor (with a single thread) is created for the event handler thread to run in.
+ * Alternatively, you may configure another TaskExecutor. You need to make sure there are sufficient threads available
+ * in the executor.
+ *
  * @author Allard Buijze
  */
 public class BufferingAnnotationEventHandlerAdapter extends AnnotationEventHandlerAdapter {

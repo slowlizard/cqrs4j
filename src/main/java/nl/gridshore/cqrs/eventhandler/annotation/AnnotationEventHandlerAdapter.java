@@ -26,6 +26,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
+ * Adapter that turns any bean with {@link nl.gridshore.cqrs.eventhandler.annotation.EventHandler} annotated methods
+ * into an {@link nl.gridshore.cqrs.eventhandler.EventHandler}.
+ * <p/>
+ * Optionally, this adapter may be configured with an {@link EventBus} at which the adapter should register for events.
+ * If none is configured, one is autowired (requiring that exactly one {@link EventBus} is present in the
+ * ApplicationContext.
+ *
  * @author Allard Buijze
  */
 public class AnnotationEventHandlerAdapter

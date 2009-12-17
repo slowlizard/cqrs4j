@@ -45,6 +45,12 @@ public abstract class AbstractAggregateRoot implements AggregateRoot {
         uncommittedEvents.setFirstSequenceNumber(lastSequenceNumber + 1);
     }
 
+    /**
+     * Apply the provided event. Applying events means they are added to the uncommitted event queue and forwarded to
+     * the {@link #handle(DomainEvent) event handler method} for processing.
+     *
+     * @param event The event to apply
+     */
     protected void apply(DomainEvent event) {
         uncommittedEvents.addEvent(event);
         handle(event);

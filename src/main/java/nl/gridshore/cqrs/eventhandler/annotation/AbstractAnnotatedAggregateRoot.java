@@ -25,7 +25,16 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 /**
+ * Convenience super type for aggregate roots that have their event handler methods annotated with the {@link
+ * nl.gridshore.cqrs.eventhandler.annotation.EventHandler} annotation.
+ * <p/>
+ * Implementations can call the {@link #apply(nl.gridshore.cqrs.DomainEvent)} method to have an event applied.
+ * <p/>
+ * Any events that are passed to the {@link #apply(nl.gridshore.cqrs.DomainEvent)} method for which no event handler can
+ * be found will cause an {@link nl.gridshore.cqrs.eventhandler.annotation.UnhandledEventException} to be thrown.
+ *
  * @author Allard Buijze
+ * @see nl.gridshore.cqrs.eventhandler.annotation.EventHandler
  */
 public abstract class AbstractAnnotatedAggregateRoot extends AbstractAggregateRoot implements AggregateRoot {
 
