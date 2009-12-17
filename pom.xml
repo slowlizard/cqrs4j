@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <groupId>nl.gridshore.cqrs4j</groupId>
     <artifactId>cqrs4j</artifactId>
@@ -186,5 +187,6 @@
     <scm>
         <connection>scm:svn:http://cqrs4j.googlecode.com/svn/trunk</connection>
         <developerConnection>scm:svn:https://cqrs4j.googlecode.com/svn/trunk</developerConnection>
+        <url>http://code.google.com/p/cqrs4j/source/browse/</url>
     </scm>
 </project>
