@@ -186,6 +186,6 @@
         </repository>
     </distributionManagement>
     <scm>
-        <url>svn:https://cqrs4j.googlecode.com/svn/trunk</url>
+        <connection>svn:https://cqrs4j.googlecode.com/svn/trunk</connection>
     </scm>
 </project>
