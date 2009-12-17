@@ -1,0 +1,43 @@
+#summary Getting started guide
+
+= Getting started =
+
+== Configuring maven ==
+
+Add the following code in your dependencies section:
+{{{
+<dependency>
+  <groupId>nl.gridshore.cqrs4j</groupId>
+  <artifactId>cqrs4j</artifactId>
+  <version>0.1</version>
+</dependency>
+}}}
+
+Make sure your maven installation has access to the cqrs4j repository, where the necessary jars and poms are located. 
+
+If you use a repository proxy, such as Artifactory, configure the following url:
+`http://cqrs4j.googlecode.com/svn/repo`
+
+You can also add a repository configuration to you pom.xml:
+
+{{{
+<repositories>
+  <repository>
+    <id>cqrs4j</id>
+    <url>http://cqrs4j.googlecode.com/svn/repo</url>
+  </repository>
+</repositories>
+}}}
+
+== Additional dependencies ==
+
+Most of the features provided by the _cqrs4j_ framework are optional and require additional dependencies. We have chosen not to add these dependencies by default, as they would possibly clutter your project with stuff you don't need.
+
+Below is a table of additional features and the extra dependencies you need:
+
+|| *Feature* || *Dependency* ||
+|| [EventSourcing Event sourcing] || com.thoughtworks.xstream:xstream:1.3.1 ||
+|| Transaction aware event handler adapters || org.springframework:spring-tx:3.0.0.RELEASE ||
+|| Spring Integration support || org.springframework.integration:spring-integration-core:1.0.3.RELEASE |||
+
+Note: the version numbers are the ones _cqrs4j_ has been tested with. Other versions might work, but might not.
