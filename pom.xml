@@ -133,36 +133,11 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <!--<repository>-->
-        <!--<id>ibilio</id>-->
-        <!--<url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>-->
-        <!--</repository>-->
-        <!--<repository>-->
-        <!--<id>springsource.repository.bundles.release</id>-->
-        <!--<url>http://repository.springsource.com/maven/bundles/release</url>-->
-        <!--</repository>-->
-        <repository>
-            <id>springsource.repository.release</id>
-            <url>http://repository.springsource.com/release</url>
-        </repository>
-        <repository>
-            <id>org.springsource.maven.snapshot</id>
-            <name>SpringSource Maven Central-compatible Snapshot Repository</name>
-            <url>http://maven.springframework.org/milestone</url>
-        </repository>
-    </repositories>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-aop</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
