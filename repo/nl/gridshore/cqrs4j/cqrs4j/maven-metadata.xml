@@ -1,12 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?><metadata>
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
   <groupId>nl.gridshore.cqrs4j</groupId>
   <artifactId>cqrs4j</artifactId>
   <version>0.1-SNAPSHOT</version>
   <versioning>
+    <release>0.1</release>
     <versions>
       <version>0.1-SNAPSHOT</version>
       <version>0.1</version>
     </versions>
-    <lastUpdated>20091217140708</lastUpdated>
+    <lastUpdated>20091217141352</lastUpdated>
   </versioning>
 </metadata>
