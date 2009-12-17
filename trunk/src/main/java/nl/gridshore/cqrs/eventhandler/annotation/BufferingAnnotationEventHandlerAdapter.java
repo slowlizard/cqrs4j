@@ -21,14 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -46,7 +40,6 @@ public class BufferingAnnotationEventHandlerAdapter extends AnnotationEventHandl
     private final AtomicBoolean running = new AtomicBoolean(false);
     private AsyncTaskExecutor executor;
     private Future<?> runningTask;
-    private PlatformTransactionManager transactionManager;
 
     public BufferingAnnotationEventHandlerAdapter(Object annotatedEventHandler) {
         super(annotatedEventHandler);
@@ -84,10 +77,23 @@ public class BufferingAnnotationEventHandlerAdapter extends AnnotationEventHandl
         super.handle(event);
     }
 
+    protected boolean isRunning() {
+        return running.get();
+    }
+
+    protected boolean hasEventsInQueue() {
+        return queue.isEmpty();
+    }
+
+    protected DomainEvent getNextEventFromQueue(final int timeout, final TimeUnit unit) throws InterruptedException {
+        return queue.poll(timeout, unit);
+    }
+
+    protected DomainEvent getNextEventFromQueue() {
+        return queue.poll();
+    }
+
     protected Runnable getPoller() {
-        if (transactionManager != null) {
-            return new TransactionalPoller();
-        }
         return new Poller();
     }
 
@@ -109,76 +115,9 @@ public class BufferingAnnotationEventHandlerAdapter extends AnnotationEventHandl
         }
     }
 
-    private class TransactionalPoller implements Runnable {
-
-        @Override
-        public void run() {
-            while (!queue.isEmpty() || running.get()) {
-                pollAndHandle();
-            }
-        }
-
-        private void pollAndHandle() {
-            try {
-                DomainEvent event = queue.poll(1000, TimeUnit.MILLISECONDS);
-                if (event != null && canHandle(event.getClass())) {
-                    handleEvent(event);
-                }
-            } catch (InterruptedException e) {
-                // probably the thread executor is stopped
-                logger.info("***** Thread executor stopped");
-            } catch (Exception ex) {
-                logger.info("****############********", ex);
-            }
-        }
-
-        private void handleEvent(DomainEvent event) {
-            EventHandler configuration = getConfigurationFor(event);
-            int transactionCommitThreshold = configuration.commitThreshold();
-            final List<DomainEvent> eventBatch = new ArrayList<DomainEvent>();
-            eventBatch.add(event);
-            while ((event = queue.poll()) != null) {
-                if (canHandle(event.getClass())) {
-                    configuration = getConfigurationFor(event);
-                    if (transactionCommitThreshold < eventBatch.size()) {
-                        // the poll cannot return null, as the peek said to and the queue is not shared
-                        eventBatch.add(event);
-                        transactionCommitThreshold = Math.min(transactionCommitThreshold,
-                                                              configuration.commitThreshold());
-                    } else {
-                        processEventBatch(eventBatch);
-                        eventBatch.clear();
-                        eventBatch.add(event);
-                        transactionCommitThreshold = configuration.commitThreshold();
-                    }
-                }
-            }
-            // now, we have some events
-            processEventBatch(eventBatch);
-        }
-
-        private void processEventBatch(final List<DomainEvent> eventBatch) {
-            if (eventBatch.size() == 0) {
-                return;
-            }
-            new TransactionTemplate(transactionManager).execute(new TransactionCallbackWithoutResult() {
-                @Override
-                protected void doInTransactionWithoutResult(TransactionStatus status) {
-                    logger.debug("Started transaction for " + eventBatch.size() + " events");
-                    for (DomainEvent event : eventBatch) {
-                        handleInternal(event);
-                    }
-                }
-            });
-        }
-    }
-
 
     public void setTaskExecutor(AsyncTaskExecutor executor) {
         this.executor = executor;
     }
 
-    public void setTransactionManager(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
 }

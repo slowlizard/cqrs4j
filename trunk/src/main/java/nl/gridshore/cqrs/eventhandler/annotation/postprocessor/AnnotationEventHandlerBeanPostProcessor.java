@@ -21,14 +21,12 @@ import net.sf.cglib.proxy.InvocationHandler;
 import nl.gridshore.cqrs.eventhandler.annotation.AnnotationEventHandlerAdapter;
 import nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventHandlerAdapter;
 import nl.gridshore.cqrs.eventhandler.annotation.EventHandler;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -44,7 +42,6 @@ public class AnnotationEventHandlerBeanPostProcessor
         implements BeanPostProcessor, ApplicationContextAware, DisposableBean {
 
     private final List<DisposableBean> beansToDisposeOfAtShutdown = new LinkedList<DisposableBean>();
-    private PlatformTransactionManager transactionManager;
     private AsyncTaskExecutor taskExecutor;
     private ApplicationContext applicationContext;
 
@@ -55,7 +52,7 @@ public class AnnotationEventHandlerBeanPostProcessor
 
     @Override
     public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
-        Class<?> targetClass = AopUtils.getTargetClass(bean);
+        Class<?> targetClass = bean.getClass();
         if (targetClass == null) {
             return bean;
         }
@@ -68,11 +65,8 @@ public class AnnotationEventHandlerBeanPostProcessor
     }
 
     private BufferingAnnotationEventHandlerAdapter createEventHandlerAdapter(Object bean) {
-        BufferingAnnotationEventHandlerAdapter adapter = new BufferingAnnotationEventHandlerAdapter(bean);
+        BufferingAnnotationEventHandlerAdapter adapter = adapt(bean);
         adapter.setApplicationContext(applicationContext);
-        if (transactionManager != null) {
-            adapter.setTransactionManager(transactionManager);
-        }
         if (taskExecutor != null) {
             adapter.setTaskExecutor(taskExecutor);
         }
@@ -85,9 +79,12 @@ public class AnnotationEventHandlerBeanPostProcessor
         return adapter;
     }
 
+    protected BufferingAnnotationEventHandlerAdapter adapt(Object bean) {
+        return new BufferingAnnotationEventHandlerAdapter(bean);
+    }
+
     private Object createAdapterProxy(Class targetClass, Object eventHandler, AnnotationEventHandlerAdapter adapter) {
         Class[] adapterInterfaces = ClassUtils.getAllInterfaces(adapter);
-        //new Class[]{nl.gridshore.cqrs.eventhandler.EventHandler.class, MessageHandler.class};
 
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(targetClass);
@@ -98,7 +95,7 @@ public class AnnotationEventHandlerBeanPostProcessor
     }
 
     private boolean isNotEventHandlerSubclass(Class<?> beanClass) {
-        return !EventHandler.class.isAssignableFrom(beanClass);
+        return !nl.gridshore.cqrs.eventhandler.EventHandler.class.isAssignableFrom(beanClass);
     }
 
     private boolean hasEventHandlerMethod(Class<?> beanClass) {
@@ -124,10 +121,6 @@ public class AnnotationEventHandlerBeanPostProcessor
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
-
-    public void setTransactionManager(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
     }
 
     public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
