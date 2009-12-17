@@ -42,6 +42,8 @@ import java.lang.annotation.Target;
  * behavior is undefined.
  *
  * @author Allard Buijze
+ * @see nl.gridshore.cqrs.eventhandler.annotation.AnnotationEventHandlerAdapter
+ * @see nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventHandlerAdapter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -49,7 +51,7 @@ public @interface EventHandler {
 
     /**
      * The number of event handler calls that may be done in a transaction where the call to this event handler is part
-     * of. Defaults to 50. 
+     * of. Defaults to 50.
      * <p/>
      * Setting this value to 1 will force event transaction aware {@link nl.gridshore.cqrs.eventhandler.EventHandler}s
      * to execute the annotated method in a separate transaction.
