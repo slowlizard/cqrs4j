@@ -19,6 +19,13 @@ package nl.gridshore.cqrs.eventhandler.annotation;
 import nl.gridshore.cqrs.DomainEvent;
 
 /**
+ * Raised when an event could not be handled by an Aggregate. This is an exceptional situation, as an aggregate is
+ * responsible for generating the events that it should be able to handle. This typically means an event handler method
+ * is missing.
+ * <p/>
+ * To prevent this exception, make a method that accepts a {@link nl.gridshore.cqrs.DomainEvent} as sole parameter and
+ * annotate it with {@link nl.gridshore.cqrs.eventhandler.annotation.EventHandler}.
+ *
  * @author Allard Buijze
  */
 public class UnhandledEventException extends RuntimeException {
