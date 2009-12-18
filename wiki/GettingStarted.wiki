@@ -1,6 +1,6 @@
 #summary Getting started guide
 #labels Featured,Priority-1
-
+#sidebar TableOfContents
 
 <wiki:toc max_depth="2" />
 = Obtaining necessary libraries =
