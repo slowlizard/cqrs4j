@@ -18,7 +18,7 @@ package nl.gridshore.cqrs.repository.eventsourcing;
 
 import nl.gridshore.cqrs.AggregateRoot;
 import nl.gridshore.cqrs.EventStream;
-import nl.gridshore.cqrs.eventhandler.EventDispatcher;
+import nl.gridshore.cqrs.eventhandler.EventBus;
 import nl.gridshore.cqrs.repository.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,15 +29,15 @@ import java.util.UUID;
  */
 public abstract class EventSourcingRepository<T extends AggregateRoot> implements Repository<T> {
 
-    protected EventStore eventStore = new XStreamEventStore();
-    protected EventDispatcher eventDispatcher;
+    protected EventStore eventStore = new XStreamFileSystemEventStore();
+    protected EventBus eventBus;
 
     @Override
     public void save(T aggregate) {
         eventStore.appendEvents(getTypeIdentifier(), aggregate.getUncommittedEvents());
         EventStream uncommittedEvents = aggregate.getUncommittedEvents();
         while (uncommittedEvents.hasNext()) {
-            eventDispatcher.dispatch(uncommittedEvents.next());
+            eventBus.publish(uncommittedEvents.next());
         }
         aggregate.commitEvents();
     }
@@ -54,8 +54,8 @@ public abstract class EventSourcingRepository<T extends AggregateRoot> implement
     protected abstract String getTypeIdentifier();
 
     @Autowired
-    public void setEventDispatcher(EventDispatcher eventDispatcher) {
-        this.eventDispatcher = eventDispatcher;
+    public void setEventBus(EventBus eventBus) {
+        this.eventBus = eventBus;
     }
 
     public void setEventStore(EventStore eventStore) {

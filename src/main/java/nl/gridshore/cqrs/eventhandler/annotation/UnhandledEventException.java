@@ -37,6 +37,11 @@ public class UnhandledEventException extends RuntimeException {
         this.unhandledEvent = unhandledEvent;
     }
 
+    /**
+     * Returns the events that could not be handled
+     *
+     * @return the unhandled event
+     */
     public DomainEvent getUnhandledEvent() {
         return unhandledEvent;
     }

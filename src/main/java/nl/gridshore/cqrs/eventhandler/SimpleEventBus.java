@@ -25,23 +25,23 @@ import java.util.LinkedList;
  */
 public class SimpleEventBus implements EventBus {
 
-    private LinkedList<EventHandler> handlers;
+    private LinkedList<EventListener> listeners;
 
     @Override
-    public void unsubscribe(EventHandler eventHandler) {
-        handlers.remove(eventHandler);
+    public void unsubscribe(EventListener eventListener) {
+        listeners.remove(eventListener);
     }
 
     @Override
-    public void subscribe(EventHandler eventHandler) {
-        handlers.add(eventHandler);
+    public void subscribe(EventListener eventListener) {
+        listeners.add(eventListener);
     }
 
     @Override
-    public void dispatch(DomainEvent event) {
-        for (EventHandler handler : handlers) {
-            if (handler.canHandle(event.getClass())) {
-                handler.handle(event);
+    public void publish(DomainEvent event) {
+        for (EventListener listener : listeners) {
+            if (listener.canHandle(event.getClass())) {
+                listener.handle(event);
             }
         }
     }

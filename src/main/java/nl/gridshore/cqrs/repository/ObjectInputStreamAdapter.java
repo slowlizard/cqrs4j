@@ -25,15 +25,23 @@ import java.io.ObjectInputStream;
 import java.util.UUID;
 
 /**
+ * {@link nl.gridshore.cqrs.EventStream} implementation that takes an ObjectInputStream as input for events. This
+ * implementation uses read-ahead to initialize the aggregateIdentifier upon initialization of the adapter. If there are
+ * no events in the ObjectInputStream, the aggregate identifier cannot be resolved and will return null.
+ *
  * @author Allard Buijze
  */
 public class ObjectInputStreamAdapter implements EventStream {
 
     private final ObjectInputStream objectInputStream;
+    private final UUID aggregateIdentifier;
+    private volatile DomainEvent nextEvent;
 
-    private DomainEvent nextEvent;
-    private UUID aggregateIdentifier;
-
+    /**
+     * Construct a EventStream using the provided ObjectInputStream as event provider.
+     *
+     * @param objectInputStream the backing input stream that provides the events
+     */
     public ObjectInputStreamAdapter(final ObjectInputStream objectInputStream) {
         this.objectInputStream = objectInputStream;
         try {
@@ -41,14 +49,20 @@ public class ObjectInputStreamAdapter implements EventStream {
         } catch (IOException e) {
             throw new IllegalStateException("The provided objectInputStream is not ready for reading");
         }
-        aggregateIdentifier = nextEvent.getAggregateIdentifier();
+        aggregateIdentifier = (nextEvent == null ? null : nextEvent.getAggregateIdentifier());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean hasNext() {
         return nextEvent != null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DomainEvent next() {
         DomainEvent currentEvent = nextEvent;
@@ -61,6 +75,12 @@ public class ObjectInputStreamAdapter implements EventStream {
         return currentEvent;
     }
 
+    /**
+     * Returns the Aggregate Identifier that the events in this stream apply to. May return null if no events are
+     * available in the stream.
+     *
+     * @return the aggregate identifier of the events in this stream
+     */
     @Override
     public UUID getAggregateIdentifier() {
         return aggregateIdentifier;

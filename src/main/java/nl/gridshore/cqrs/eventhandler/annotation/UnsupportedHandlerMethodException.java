@@ -34,6 +34,13 @@ public class UnsupportedHandlerMethodException extends RuntimeException {
         this.violatingMethod = violatingMethod;
     }
 
+    /**
+     * A reference to the method that violated the event handler rules
+     *
+     * @return the method that violated the event handler rules
+     *
+     * @see nl.gridshore.cqrs.eventhandler.annotation.EventHandler
+     */
     public Method getViolatingMethod() {
         return violatingMethod;
     }

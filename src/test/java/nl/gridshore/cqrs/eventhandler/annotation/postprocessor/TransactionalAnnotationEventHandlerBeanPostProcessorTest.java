@@ -1,8 +1,8 @@
 package nl.gridshore.cqrs.eventhandler.annotation.postprocessor;
 
 import nl.gridshore.cqrs.DomainEvent;
-import nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventHandlerAdapter;
-import nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventHandlerAdapter;
+import nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventListenerAdapter;
+import nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter;
 import org.junit.*;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,36 +15,37 @@ import static org.mockito.Mockito.*;
  */
 public class TransactionalAnnotationEventHandlerBeanPostProcessorTest {
 
-    private TransactionalAnnotationEventHandlerBeanPostProcessor testSubject;
+    private TransactionalAnnotationEventListenerBeanPostProcessor testSubject;
 
     @Before
     public void setUp() {
-        testSubject = new TransactionalAnnotationEventHandlerBeanPostProcessor();
+        testSubject = new TransactionalAnnotationEventListenerBeanPostProcessor();
         testSubject.setTransactionManager(mock(PlatformTransactionManager.class));
     }
 
     @Test
     public void testAdapt_NonTransactionalBean() {
-        BufferingAnnotationEventHandlerAdapter actualResult = testSubject.adapt(new NonTransactionalEventHandler());
-        assertEquals(BufferingAnnotationEventHandlerAdapter.class, actualResult.getClass());
+        BufferingAnnotationEventListenerAdapter actualResult = testSubject.adapt(new NonTransactionalEventHandler());
+        assertEquals(BufferingAnnotationEventListenerAdapter.class, actualResult.getClass());
     }
 
     @Test
     public void testAdapt_TransactionOnClass() {
-        BufferingAnnotationEventHandlerAdapter actualResult = testSubject.adapt(new TransactionOnClassEventHandler());
-        assertEquals(TransactionalAnnotationEventHandlerAdapter.class, actualResult.getClass());
+        BufferingAnnotationEventListenerAdapter actualResult = testSubject.adapt(new TransactionOnClassEventHandler());
+        assertEquals(TransactionalAnnotationEventListenerAdapter.class, actualResult.getClass());
     }
 
     @Test
     public void testAdapt_TransactionOnMethod() {
-        BufferingAnnotationEventHandlerAdapter actualResult = testSubject.adapt(new TransactionOnMethodEventHandler());
-        assertEquals(TransactionalAnnotationEventHandlerAdapter.class, actualResult.getClass());
+        BufferingAnnotationEventListenerAdapter actualResult = testSubject.adapt(new TransactionOnMethodEventHandler());
+        assertEquals(TransactionalAnnotationEventListenerAdapter.class, actualResult.getClass());
     }
 
     @Test
     public void testAdapt_TransactionOnSuperClass() {
-        BufferingAnnotationEventHandlerAdapter actualResult = testSubject.adapt(new TransactionInheritedEventHandler());
-        assertEquals(TransactionalAnnotationEventHandlerAdapter.class, actualResult.getClass());
+        BufferingAnnotationEventListenerAdapter actualResult = testSubject
+                .adapt(new TransactionInheritedEventHandler());
+        assertEquals(TransactionalAnnotationEventListenerAdapter.class, actualResult.getClass());
     }
 
     private static class NonTransactionalEventHandler {

@@ -17,7 +17,7 @@
 package nl.gridshore.cqrs.repository.eventsourcing;
 
 /**
- * Exception indicating the the given events stream could not be stored due to an underlying exception.
+ * Indicates that the given events stream could not be stored or read due to an underlying exception.
  *
  * @author Allard Buijze
  */

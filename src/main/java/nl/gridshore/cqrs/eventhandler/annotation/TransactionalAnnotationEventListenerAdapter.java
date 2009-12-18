@@ -3,6 +3,7 @@ package nl.gridshore.cqrs.eventhandler.annotation;
 import nl.gridshore.cqrs.DomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -13,30 +14,37 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Specialization of the {@link nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventHandlerAdapter} that
- * allows events to be handled transactionally. This requires the configuration of a {@link
- * org.springframework.transaction.PlatformTransactionManager}.
+ * Specialization of the {@link BufferingAnnotationEventListenerAdapter} that allows events to be handled
+ * transactionally. This requires the configuration of a {@link org.springframework.transaction.PlatformTransactionManager}.
  * <p/>
- * The event handler classes need to be marked as transactional. A handler is considered marked if the class or any of
+ * The event listener classes need to be marked as transactional. A handler is considered marked if the class or any of
  * its methods are annotated with {@link org.springframework.transaction.annotation.Transactional}.
  *
  * @author Allard Buijze
  * @see org.springframework.transaction.annotation.Transactional
  * @see nl.gridshore.cqrs.eventhandler.annotation.EventHandler
- * @see nl.gridshore.cqrs.eventhandler.annotation.postprocessor.TransactionalAnnotationEventHandlerBeanPostProcessor
+ * @see nl.gridshore.cqrs.eventhandler.annotation.postprocessor.TransactionalAnnotationEventListenerBeanPostProcessor
  */
-public class TransactionalAnnotationEventHandlerAdapter extends BufferingAnnotationEventHandlerAdapter {
+public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnotationEventListenerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(TransactionalAnnotationEventHandlerAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionalAnnotationEventListenerAdapter.class);
 
     private PlatformTransactionManager transactionManager;
 
-    public TransactionalAnnotationEventHandlerAdapter(Object annotatedEventHandler) {
-        super(annotatedEventHandler);
+    /**
+     * Initialize the TransactionalAnnotationEventListenerAdapter for the given <code>annotatedEventListener</code>.
+     *
+     * @param annotatedEventListener the event listener
+     */
+    public TransactionalAnnotationEventListenerAdapter(Object annotatedEventListener) {
+        super(annotatedEventListener);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected Runnable getPoller() {
+    protected Runnable createPoller() {
         return new TransactionalPoller();
     }
 
@@ -104,6 +112,12 @@ public class TransactionalAnnotationEventHandlerAdapter extends BufferingAnnotat
         }
     }
 
+    /**
+     * Sets the transaction manager to use when handling events transactionally.
+     *
+     * @param transactionManager the transaction manager to use when handling events transactionally.
+     */
+    @Required
     public void setTransactionManager(PlatformTransactionManager transactionManager) {
         this.transactionManager = transactionManager;
     }

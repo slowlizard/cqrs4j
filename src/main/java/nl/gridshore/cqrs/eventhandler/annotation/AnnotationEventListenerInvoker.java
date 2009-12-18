@@ -28,13 +28,13 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author Allard Buijze
  */
-class AnnotationEventHandlerInvoker {
+class AnnotationEventListenerInvoker {
 
     // guarded by "this"
     private final transient Map<Class, Method> eventHandlers = new WeakHashMap<Class, Method>();
     private final Object target;
 
-    public AnnotationEventHandlerInvoker(Object target) {
+    public AnnotationEventListenerInvoker(Object target) {
         this.target = target;
         validateHandlerMethods(target);
     }
@@ -51,7 +51,7 @@ class AnnotationEventHandlerInvoker {
                     if (method.getParameterTypes().length != 1) {
                         throw new UnsupportedHandlerMethodException(String.format(
                                 "Event Handling class %s contains method %s that has more than one parameter. "
-                                        + "Either remove @EventHandler annotation or reduce to a single parameter.",
+                                        + "Either remove @EventListener annotation or reduce to a single parameter.",
                                 method.getDeclaringClass().getSimpleName(),
                                 method.getName()),
                                                                     method);
@@ -72,7 +72,7 @@ class AnnotationEventHandlerInvoker {
     protected void invokeEventHandlerMethod(DomainEvent event) {
         Method m = findEventHandlerMethod(event.getClass());
         if (m == null) {
-            // event handler doesn't support this type of event
+            // event listener doesn't support this type of event
             return;
         }
         try {

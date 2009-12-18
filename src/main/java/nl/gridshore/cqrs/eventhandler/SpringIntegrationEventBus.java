@@ -33,38 +33,38 @@ import java.util.concurrent.ConcurrentMap;
 public class SpringIntegrationEventBus implements EventBus {
 
     private SubscribableChannel channel;
-    private ConcurrentMap<EventHandler, MessageHandler> handlers = new ConcurrentHashMap<EventHandler, MessageHandler>();
+    private ConcurrentMap<EventListener, MessageHandler> handlers = new ConcurrentHashMap<EventListener, MessageHandler>();
 
     @Override
-    public void unsubscribe(EventHandler eventHandler) {
-        MessageHandler messageHandler = handlers.remove(eventHandler);
+    public void unsubscribe(EventListener eventListener) {
+        MessageHandler messageHandler = handlers.remove(eventListener);
         channel.unsubscribe(messageHandler);
     }
 
     @Override
-    public void subscribe(EventHandler eventHandler) {
-        MessageHandler messagehandler = new MessageHandlerAdapter(eventHandler);
-        handlers.putIfAbsent(eventHandler, messagehandler);
+    public void subscribe(EventListener eventListener) {
+        MessageHandler messagehandler = new MessageHandlerAdapter(eventListener);
+        handlers.putIfAbsent(eventListener, messagehandler);
         channel.subscribe(messagehandler);
     }
 
     @Override
-    public void dispatch(DomainEvent event) {
+    public void publish(DomainEvent event) {
         channel.send(new GenericMessage<Object>(event));
     }
 
     private class MessageHandlerAdapter implements MessageHandler {
 
-        private final EventHandler eventHandler;
+        private final EventListener eventListener;
 
-        public MessageHandlerAdapter(EventHandler eventHandler) {
-            this.eventHandler = eventHandler;
+        public MessageHandlerAdapter(EventListener eventListener) {
+            this.eventListener = eventListener;
         }
 
         @Override
         public void handleMessage(Message<?> message)
                 throws MessageHandlingException, MessageDeliveryException {
-            eventHandler.handle((DomainEvent) message.getPayload());
+            eventListener.handle((DomainEvent) message.getPayload());
         }
     }
 

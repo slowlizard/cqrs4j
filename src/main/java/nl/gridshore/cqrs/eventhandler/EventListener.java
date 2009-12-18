@@ -22,13 +22,27 @@ import nl.gridshore.cqrs.DomainEvent;
  * Interface to be implemented by classes that can handle events.
  *
  * @author Allard Buijze
- * @see nl.gridshore.cqrs.eventhandler.EventDispatcher
  * @see nl.gridshore.cqrs.eventhandler.EventBus
+ * @see nl.gridshore.cqrs.DomainEvent
  * @see nl.gridshore.cqrs.eventhandler.annotation.EventHandler
  */
-public interface EventHandler {
+public interface EventListener {
 
+    /**
+     * Indicates whether this event listener can handle events of the given type. This method is used as an early
+     * detection during the dispatching process.
+     *
+     * @param eventType the type of event
+     * @return true if this event listener can handle the event, false otherwise
+     */
     boolean canHandle(Class<? extends DomainEvent> eventType);
 
+    /**
+     * Process the given event. There are no guarantees that this method is not called with types for which {@link
+     * #canHandle(Class)} returned false. In such case, this method should return normally (typically without doing
+     * anything).
+     *
+     * @param event the event to handle
+     */
     void handle(DomainEvent event);
 }

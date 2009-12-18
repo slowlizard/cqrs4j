@@ -16,13 +16,42 @@
 
 package nl.gridshore.cqrs.eventhandler;
 
+import nl.gridshore.cqrs.DomainEvent;
+
 /**
+ * Specification of the mechanism on which the Event Listeners can subscribe for events and event publishers can publish
+ * their events.
+ * <p/>
+ * Implementations may or may not dispatch the events to event listeners in the dispatching thread.
+ *
  * @author Allard Buijze
+ * @see nl.gridshore.cqrs.eventhandler.EventListener
+ * @see nl.gridshore.cqrs.eventhandler.SimpleEventBus
+ * @see nl.gridshore.cqrs.eventhandler.SpringIntegrationEventBus
  */
-public interface EventBus extends EventDispatcher {
+public interface EventBus {
 
-    void unsubscribe(EventHandler eventHandler);
+    /**
+     * Publish an event on this bus. It is forwarded to all subscribed event listeners.
+     *
+     * @param event the event to publish
+     */
+    void publish(DomainEvent event);
 
-    void subscribe(EventHandler eventHandler);
+    /**
+     * Subscribe the given <code>eventListener</code> to this bus. When subscribed, it will receive all events published
+     * to this bus.
+     *
+     * @param eventListener The event listener to subscribe
+     */
+    void subscribe(EventListener eventListener);
+
+    /**
+     * Unsubscribe the given <code>eventListener</code> to this bus. When unsubscribed, it will no longer receive events
+     * published to this bus.
+     *
+     * @param eventListener The event listener to unsubscribe
+     */
+    void unsubscribe(EventListener eventListener);
 
 }

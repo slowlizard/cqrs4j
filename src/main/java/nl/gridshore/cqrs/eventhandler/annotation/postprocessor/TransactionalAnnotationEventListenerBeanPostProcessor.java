@@ -1,7 +1,7 @@
 package nl.gridshore.cqrs.eventhandler.annotation.postprocessor;
 
-import nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventHandlerAdapter;
-import nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventHandlerAdapter;
+import nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventListenerAdapter;
+import nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,26 +11,26 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Implementation of the {@link AnnotationEventHandlerBeanPostProcessor} that checks event handlers for the availability
- * of a {@link org.springframework.transaction.annotation.Transactional} annotation. If one is found, a {@link
- * nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventHandlerAdapter transaction aware event handler
- * adapter} is used to adapt the bean.
+ * Implementation of the {@link AnnotationEventListenerBeanPostProcessor} that checks event listeners for the
+ * availability of a {@link org.springframework.transaction.annotation.Transactional} annotation. If one is found, a
+ * {@link nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter transaction aware event
+ * listener adapter} is used to adapt the bean.
  *
  * @author Allard Buijze
  * @see org.springframework.transaction.annotation.Transactional
- * @see nl.gridshore.cqrs.eventhandler.annotation.postprocessor.AnnotationEventHandlerBeanPostProcessor
- * @see nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventHandlerAdapter
+ * @see AnnotationEventListenerBeanPostProcessor
+ * @see nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter
  */
-public class TransactionalAnnotationEventHandlerBeanPostProcessor extends AnnotationEventHandlerBeanPostProcessor {
+public class TransactionalAnnotationEventListenerBeanPostProcessor extends AnnotationEventListenerBeanPostProcessor {
 
     private PlatformTransactionManager transactionManager;
 
     @Override
-    protected BufferingAnnotationEventHandlerAdapter adapt(Object bean) {
+    protected BufferingAnnotationEventListenerAdapter adapt(Object bean) {
         if (!isTransactional(bean)) {
-            return new BufferingAnnotationEventHandlerAdapter(bean);
+            return new BufferingAnnotationEventListenerAdapter(bean);
         }
-        TransactionalAnnotationEventHandlerAdapter adapter = new TransactionalAnnotationEventHandlerAdapter(bean);
+        TransactionalAnnotationEventListenerAdapter adapter = new TransactionalAnnotationEventListenerAdapter(bean);
 
         if (transactionManager != null) {
             adapter.setTransactionManager(transactionManager);
