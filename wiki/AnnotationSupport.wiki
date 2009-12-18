@@ -52,6 +52,23 @@ There are, however, a few rules for these methods:
 
 Once the annotation bean post processor is defined in the spring application context, all you need to to is add the bean definitions of your annotated event listeners to the context. That's it.
 
+Examples of valid event handler signatures:
+{{{
+public void onSomeEvent(SomeEvent event)
+public Object onSomeEvent(SomeEvent event)
+}}}
+
+Good, but highly discouraged:
+{{{
+public void onSomeEvent(SomeEvent event) throws SomeCheckedException
+}}}
+
+Wrong:
+{{{
+public void onSomeEvent(SomeEvent event, SomeOtherInformation info)
+public void onSomeEvent(DoesNotExtendDomainEvent event)
+}}}
+
 = Adding transaction support =
 _cqrs4j_ provides out-of-the-box support for Spring style transaction management. If you have configured the `TransactionalAnnotationEventListenerBeanPostProcessor` with a transaction manager, your event handler methods will be called transactionally if they (or the class they are defined in) contains Spring's `@Transactional` annotation.
 
