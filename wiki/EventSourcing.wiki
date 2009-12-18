@@ -1,4 +1,10 @@
 #summary Event Sourcing support
 = Introduction =
+Event Sourcing is the process of using the events as primary source of information to restore the state of an aggregate. This concept allows you to use the actual source of aggregate state as your audit trail.
 
-Coming soon
+=Using event sourcing support=
+Using Event Sourcing in _cqrs4j_ is really easy. All you need to do is the following:
+* Create an implement a subclass of `EventSourcingRepository` and implement the abstract methods.
+* Configure it in your Spring application context using an `EventStore`. _cqrs4j_ provides an `XStreamFileSystemEventStore` for you, which needs to be configured with a source directory to store events in.
+
+You can tweak the event storage process by implementing your own EventStore. You could, for example store events in a database.
