@@ -2,7 +2,7 @@
 #labels Featured
 
 
-<wiki:toc min_depth="1" />
+<wiki:toc max_depth="2" />
 = Obtaining necessary libraries =
 == Configuring maven ==
 
