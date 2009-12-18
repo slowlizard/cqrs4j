@@ -1,5 +1,5 @@
 #summary Overview of the annotation support features of cqrs4j
-#labels Featured,Priority-2
+#labels Featured
 #sidebar TableOfContents
 
 <wiki:toc max_depth="2" />
