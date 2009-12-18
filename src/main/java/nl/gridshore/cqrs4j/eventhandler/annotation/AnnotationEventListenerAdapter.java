@@ -40,9 +40,9 @@ public class AnnotationEventListenerAdapter
 
     private EventBus eventBus;
 
-    private transient ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
     private final Object target;
-    private final AnnotationEventListenerInvoker eventListenerInvoker;
+    private final AnnotationEventHandlerInvoker eventHandlerInvoker;
 
     /**
      * Initialize the AnnotationEventListenerAdapter for the given <code>annotatedEventListener</code>.
@@ -50,7 +50,7 @@ public class AnnotationEventListenerAdapter
      * @param annotatedEventListener the event listener
      */
     public AnnotationEventListenerAdapter(Object annotatedEventListener) {
-        eventListenerInvoker = new AnnotationEventListenerInvoker(annotatedEventListener);
+        eventHandlerInvoker = new AnnotationEventHandlerInvoker(annotatedEventListener);
         this.target = annotatedEventListener;
     }
 
@@ -59,7 +59,7 @@ public class AnnotationEventListenerAdapter
      */
     @Override
     public boolean canHandle(Class<? extends DomainEvent> eventType) {
-        return eventListenerInvoker.canHandle(eventType);
+        return eventHandlerInvoker.canHandle(eventType);
     }
 
     /**
@@ -67,7 +67,7 @@ public class AnnotationEventListenerAdapter
      */
     @Override
     public void handle(DomainEvent event) {
-        eventListenerInvoker.invokeEventHandlerMethod(event);
+        eventHandlerInvoker.invokeEventHandlerMethod(event);
     }
 
     /**
@@ -77,7 +77,7 @@ public class AnnotationEventListenerAdapter
      * @param event the event for which to search configuration.
      */
     public nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler getConfigurationFor(DomainEvent event) {
-        return eventListenerInvoker.findEventHandlerConfiguration(event);
+        return eventHandlerInvoker.findEventHandlerConfiguration(event);
     }
 
     /**

@@ -29,6 +29,12 @@ public class UnsupportedHandlerMethodException extends RuntimeException {
 
     private final Method violatingMethod;
 
+    /**
+     * Initialize the exception with a <code>message</code> and the <code>violatingMethod</code>
+     *
+     * @param message         a descriptive message of the violation
+     * @param violatingMethod the method that violates the rules of annotated Event Handlers
+     */
     public UnsupportedHandlerMethodException(String message, Method violatingMethod) {
         super(message);
         this.violatingMethod = violatingMethod;

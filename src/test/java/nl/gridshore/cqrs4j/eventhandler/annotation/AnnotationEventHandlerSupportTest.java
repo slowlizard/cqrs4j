@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 @SuppressWarnings({"UnusedDeclaration"})
 public class AnnotationEventHandlerSupportTest {
 
-    private AnnotationEventListenerInvoker testSubject;
+    private AnnotationEventHandlerInvoker testSubject;
 
     /*
     Test scenario:
@@ -38,7 +38,7 @@ public class AnnotationEventHandlerSupportTest {
     @Test
     public void testInvokeEventHandler_SubClassHasPriority() {
         SecondSubclass secondSubclass = new SecondSubclass();
-        testSubject = new AnnotationEventListenerInvoker(secondSubclass);
+        testSubject = new AnnotationEventHandlerInvoker(secondSubclass);
         testSubject.invokeEventHandlerMethod(new StubEventTwo());
 
         assertEquals("Method handler 1 shouldn't be invoked. Calls", 0, secondSubclass.invocationCount1);
@@ -54,7 +54,7 @@ public class AnnotationEventHandlerSupportTest {
     @Test
     public void testInvokeEventHandler_MostSpecificHandlerInClassChosen() {
         FirstSubclass handler = new FirstSubclass();
-        testSubject = new AnnotationEventListenerInvoker(handler);
+        testSubject = new AnnotationEventHandlerInvoker(handler);
         testSubject.invokeEventHandlerMethod(new StubEventTwo() {/*anonymous subclass*/
         });
 
@@ -65,7 +65,7 @@ public class AnnotationEventHandlerSupportTest {
     @Test
     public void testInvokeEventHandler_UnknownEventIsIgnored() {
         FirstSubclass handler = new FirstSubclass();
-        testSubject = new AnnotationEventListenerInvoker(handler);
+        testSubject = new AnnotationEventHandlerInvoker(handler);
         testSubject.invokeEventHandlerMethod(new DomainEvent() {/*anonymous subclass*/
         });
 
@@ -82,7 +82,7 @@ public class AnnotationEventHandlerSupportTest {
     public void testValidateEventHandler_MultiParamHandlerIsRejected() {
         FirstSubclass handler = new IllegalEventHandler();
         try {
-            AnnotationEventListenerInvoker.validateHandlerMethods(handler);
+            AnnotationEventHandlerInvoker.validateHandlerMethods(handler);
             fail("Expected an UnsupportedHandlerMethodException");
         }
         catch (UnsupportedHandlerMethodException e) {
@@ -95,7 +95,7 @@ public class AnnotationEventHandlerSupportTest {
     public void testValidateEventHandler_NonEventParameterIsRejected() {
         AnotherIllegalEventHandler handler = new AnotherIllegalEventHandler();
         try {
-            AnnotationEventListenerInvoker.validateHandlerMethods(handler);
+            AnnotationEventHandlerInvoker.validateHandlerMethods(handler);
             fail("Expected an UnsupportedHandlerMethodException");
         }
         catch (UnsupportedHandlerMethodException e) {
@@ -107,7 +107,7 @@ public class AnnotationEventHandlerSupportTest {
     @Test
     public void testFindHandlerConfiguration() {
         SecondSubclass handler = new SecondSubclass();
-        testSubject = new AnnotationEventListenerInvoker(handler);
+        testSubject = new AnnotationEventHandlerInvoker(handler);
         nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler configuration = testSubject
                 .findEventHandlerConfiguration(new StubEventOne());
         assertEquals(2, configuration.commitThreshold());

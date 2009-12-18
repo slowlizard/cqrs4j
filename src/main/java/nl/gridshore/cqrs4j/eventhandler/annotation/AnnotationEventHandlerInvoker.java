@@ -26,25 +26,50 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
+ * Utility class that supports invocation of specific handler methods for a given event. See {@link
+ * nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler} for the rules for resolving the appropriate method.
+ *
  * @author Allard Buijze
+ * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
  */
-class AnnotationEventListenerInvoker {
+class AnnotationEventHandlerInvoker {
 
     // guarded by "this"
     private final transient Map<Class, Method> eventHandlers = new WeakHashMap<Class, Method>();
     private final Object target;
 
-    public AnnotationEventListenerInvoker(Object target) {
+    /**
+     * Initialize an event handler invoker that invokes handlers on the given <code>target</code>
+     *
+     * @param target the bean on which to invoke event handlers
+     */
+    public AnnotationEventHandlerInvoker(Object target) {
         this.target = target;
         validateHandlerMethods(target);
     }
 
-    public static void validateHandlerMethods(Object annotatedEventHandler) {
-        validateHandlerMethods(annotatedEventHandler.getClass());
+    /**
+     * Checks the validity of all event handler methods on the given <code>annotatedEventListener</code>.
+     *
+     * @param annotatedEventListener the event listener to validate handler methods on
+     * @throws UnsupportedHandlerMethodException
+     *          if an invalid handler is found
+     * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
+     */
+    public static void validateHandlerMethods(Object annotatedEventListener) {
+        validateHandlerMethods(annotatedEventListener.getClass());
     }
 
-    public static void validateHandlerMethods(Class<?> clazz) {
-        ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
+    /**
+     * Checks the validity of all event handler methods on the given <code>annotatedEventListenerType</code>.
+     *
+     * @param annotatedEventListenerType the event listener type to validate handler methods on
+     * @throws UnsupportedHandlerMethodException
+     *          if an invalid handler is found
+     * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
+     */
+    public static void validateHandlerMethods(Class<?> annotatedEventListenerType) {
+        ReflectionUtils.doWithMethods(annotatedEventListenerType, new ReflectionUtils.MethodCallback() {
             @Override
             public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                 if (method.isAnnotationPresent(EventHandler.class)) {
@@ -69,6 +94,11 @@ class AnnotationEventListenerInvoker {
         });
     }
 
+    /**
+     * Invoke the event handler on the target for the given <code>event</code>
+     *
+     * @param event the event to handle
+     */
     protected void invokeEventHandlerMethod(DomainEvent event) {
         Method m = findEventHandlerMethod(event.getClass());
         if (m == null) {
@@ -91,6 +121,12 @@ class AnnotationEventListenerInvoker {
         }
     }
 
+    /**
+     * Find the configuration for the event handler that would handle the given <code>event</code>
+     *
+     * @param event the event for which to find handler configuration
+     * @return the configuration for the event handler that would handle the given <code>event</code>
+     */
     protected EventHandler findEventHandlerConfiguration(DomainEvent event) {
         Method m = findEventHandlerMethod(event.getClass());
         if (m != null && m.isAnnotationPresent(EventHandler.class)) {
@@ -99,6 +135,12 @@ class AnnotationEventListenerInvoker {
         return null;
     }
 
+    /**
+     * Indicates whether the target event listener has a handler for the given <code>eventClass</code>.
+     *
+     * @param eventClass the event class to find an handler for
+     * @return true if an event handler is found, false otherwise
+     */
     protected boolean canHandle(Class<? extends DomainEvent> eventClass) {
         return findEventHandlerMethod(eventClass) != null;
     }

@@ -30,7 +30,6 @@ import java.util.UUID;
  * @see nl.gridshore.cqrs4j.DomainEvent
  * @see nl.gridshore.cqrs4j.AbstractAggregateRoot
  */
-// TODO: Detect concurrent access (i.e. access from multiple threads)
 public class EventContainer {
 
     private final List<DomainEvent> events = new LinkedList<DomainEvent>();
@@ -98,15 +97,6 @@ public class EventContainer {
         return aggregateIdentifier;
     }
 
-    private long newSequenceNumber() {
-        if (lastSequenceNumber == null) {
-            lastSequenceNumber = firstSequenceNumber;
-        } else {
-            lastSequenceNumber++;
-        }
-        return lastSequenceNumber;
-    }
-
     /**
      * Sets the first sequence number that should be assigned to an incoming event.
      *
@@ -146,6 +136,9 @@ public class EventContainer {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return aggregateIdentifier != null ? aggregateIdentifier.hashCode() : 0;
@@ -165,5 +158,14 @@ public class EventContainer {
      */
     public int size() {
         return events.size();
+    }
+
+    private long newSequenceNumber() {
+        if (lastSequenceNumber == null) {
+            lastSequenceNumber = firstSequenceNumber;
+        } else {
+            lastSequenceNumber++;
+        }
+        return lastSequenceNumber;
     }
 }
