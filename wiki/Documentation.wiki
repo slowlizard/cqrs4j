@@ -9,4 +9,4 @@ See the [GettingStarted Getting Started] page how you can get a head start with 
 If you discover any bugs, or have any feature requests, please [http://code.google.com/p/cqrs4j/issues/list let me know]. You can also report erroneous or missing documentation.
 
 = Get involved =
-If you're interested in helping make this framework, send me an email. You can reach me at buijzex at gmailx.comx (remove the x-es).
+If you're interested in helping make this framework, send me an email. You can reach me at `buijzex at gmailx.comx` (remove the x-es).
