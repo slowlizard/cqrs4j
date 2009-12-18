@@ -1,8 +1,9 @@
 #summary Getting started guide
 #labels Featured
 
-= Getting started =
 
+<wiki:toc min_depth="1" />
+= Obtaining necessary libraries =
 == Configuring maven ==
 
 Add the following code in your dependencies section:
