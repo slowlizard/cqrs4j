@@ -1,0 +1,6 @@
+#summary Entry page to all documentation
+#sidebar TableOfContents
+
+= Introduction =
+
+TODO. Discuss cqrs4j.
