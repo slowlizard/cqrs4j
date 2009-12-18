@@ -1,5 +1,6 @@
 #summary Overview of the annotation support features of cqrs4j
 #labels Featured
+<wiki:toc max_depth="2" />
 
 = Introduction =
 
@@ -32,4 +33,13 @@ There are, however, a few rules for these methods:
 
 Once the annotation bean post processor is defined in the spring application context, all you need to to is add the bean definitions of your annotated event listeners to the context. That's it.
 
- 
+= Adding transaction support =
+_cqrs4j_ provides out-of-the-box support for Spring style transaction management. If you have configured the `TransactionalAnnotationEventListenerBeanPostProcessor` with a transaction manager, your event handler methods will be called transactionally if they (or the class they are defined in) contains Spring's `@Transactional` annotation.
+
+By default, _cqrs4j_ will process multiple events in a single transaction, provided that they are available at the time any previous events are done processing. This means that a transaction will never stall waiting for more incoming events.
+
+You can configure the maximum number of events that may be handled in a single transaction using the `commitThreshold` option on the `@EventHandler` annotation. Setting this commit threshold will force the _cqrs4j_ to commit a transaction as soon as the `commitThreshold` is reached.
+
+The basic rule is as follows: an event will never be handled in a transaction that contains with more events than defined by `commitThreshold`. Setting this value to 1 will guarantee that the event is handled in its own (dedicated) transaction.
+
+Allowing more events to be handled within the same transaction could improve performance. The default value of `commitThreshold` is 50.
