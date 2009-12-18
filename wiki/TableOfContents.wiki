@@ -3,3 +3,5 @@
 Table of contents
  * [GettingStarted Getting Started]
  * [AnnotationSupport Annotation Support]
+ * [SpringIntegrationSupport Spring Integration Support]
+ * [EventSourcing Event Sourcing Support]
