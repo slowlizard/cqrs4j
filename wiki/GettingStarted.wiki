@@ -1,5 +1,5 @@
 #summary Getting started guide
-#labels Featured
+#labels Featured,Priority-1
 
 
 <wiki:toc max_depth="2" />
