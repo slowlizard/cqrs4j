@@ -1,4 +1,4 @@
-#Summary Table of contents
+#summary Table of contents
 
 =Table of contents=
  * [GettingStarted Getting Started]
