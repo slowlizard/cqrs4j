@@ -1,2 +1,3 @@
-* [GettingStarted Getting Started]
-* [AnnotationSupport Annotation Support]
+Table of contents
+ * [GettingStarted Getting Started]
+ * [AnnotationSupport Annotation Support]
