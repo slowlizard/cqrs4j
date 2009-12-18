@@ -42,14 +42,22 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
+ * Implementation of the {@link nl.gridshore.cqrs.repository.eventsourcing.EventStore} that serializes objects using
+ * XStream and writes them to files to disk. Each aggregate is represented by a single file, where each event of that
+ * aggregate is a line in that file. Events are serialized to XML format, making them readable for both user and
+ * machine.
+ * <p/>
+ * Use {@link #setBaseDir(org.springframework.core.io.Resource)} to specify the directory where event files should be
+ * stored
+ *
  * @author Allard Buijze
  */
-public class XStreamEventStore implements EventStore {
+public class XStreamFileSystemEventStore implements EventStore {
 
     private XStream xStream;
     private Resource baseDir;
 
-    public XStreamEventStore() {
+    public XStreamFileSystemEventStore() {
         xStream = new XStream();
         xStream.registerConverter(new SingleValueConverter() {
             @Override
@@ -70,6 +78,9 @@ public class XStreamEventStore implements EventStore {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void appendEvents(String type, EventStream eventsToStore) {
         OutputStream out = null;
@@ -90,6 +101,9 @@ public class XStreamEventStore implements EventStore {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public EventStream readEvents(String type, UUID identifier) {
         try {
@@ -109,7 +123,7 @@ public class XStreamEventStore implements EventStore {
         return new SequenceInputStream(prefix, new SequenceInputStream(fileStream, suffix));
     }
 
-    protected Resource getBaseDirForType(String type) {
+    private Resource getBaseDirForType(String type) {
         try {
             Resource typeSpecificDir = baseDir.createRelative("/" + type + "/");
             if (!typeSpecificDir.exists() && !typeSpecificDir.getFile().mkdirs()) {
@@ -117,20 +131,43 @@ public class XStreamEventStore implements EventStore {
             }
             return typeSpecificDir;
         } catch (IOException e) {
-            // TODO: Real error handling here
-            e.printStackTrace();
-            return baseDir;
+            throw new EventStorageException("An IO Exception occured while reading from the file system", e);
         }
     }
 
+    /**
+     * Sets the base directory where the event store will store all events.
+     *
+     * @param baseDir the location to store event files
+     */
     @Required
     public void setBaseDir(Resource baseDir) {
         this.baseDir = baseDir;
     }
 
+    /**
+     * Specify aliases for classes on serialization. When serializing an object, this event store will use the fully
+     * qualified class name as element name. Those are potentially long names. By specifying an alias, they can be
+     * considerably shortened.
+     *
+     * @param aliases a map containing the aliases as keys and their respective class as value
+     */
     public void setAliases(Map<String, Class> aliases) {
         for (Map.Entry<String, Class> entry : aliases.entrySet()) {
             xStream.alias(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     * Specify aliases for package names on serialization. When serializing an object, this event store will use the
+     * fully qualified class name as element name. Those are potentially long names. By specifying an alias for a
+     * package, they can be considerably shortened.
+     *
+     * @param aliases a map containing the aliases as keys and the full package name as value
+     */
+    public void setPackageAliases(Map<String, String> aliases) {
+        for (Map.Entry<String, String> entry : aliases.entrySet()) {
+            xStream.aliasPackage(entry.getKey(), entry.getValue());
         }
     }
 

@@ -18,8 +18,9 @@ package nl.gridshore.cqrs.eventhandler.annotation.postprocessor;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
-import nl.gridshore.cqrs.eventhandler.annotation.AnnotationEventHandlerAdapter;
-import nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventHandlerAdapter;
+import nl.gridshore.cqrs.eventhandler.EventListener;
+import nl.gridshore.cqrs.eventhandler.annotation.AnnotationEventListenerAdapter;
+import nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventListenerAdapter;
 import nl.gridshore.cqrs.eventhandler.annotation.EventHandler;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -43,15 +44,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * used by the adapters to register their pollers. This task executor must contain at least one thread per adapter
  * created (meaning one per bean with {@link nl.gridshore.cqrs.eventhandler.annotation.EventHandler} annotation).
  * <p/>
- * Beans that already implement the {@link nl.gridshore.cqrs.eventhandler.EventHandler} interface are skipped, even if
+ * Beans that already implement the {@link nl.gridshore.cqrs.eventhandler.EventListener} interface are skipped, even if
  * they contain a method with the {@link nl.gridshore.cqrs.eventhandler.annotation.EventHandler} annotation.
  *
  * @author Allard Buijze
- * @see nl.gridshore.cqrs.eventhandler.annotation.postprocessor.TransactionalAnnotationEventHandlerBeanPostProcessor
+ * @see TransactionalAnnotationEventListenerBeanPostProcessor
  * @see nl.gridshore.cqrs.eventhandler.annotation.EventHandler
- * @see nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventHandlerAdapter
+ * @see nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventListenerAdapter
  */
-public class AnnotationEventHandlerBeanPostProcessor
+public class AnnotationEventListenerBeanPostProcessor
         implements BeanPostProcessor, ApplicationContextAware, DisposableBean {
 
     private final List<DisposableBean> beansToDisposeOfAtShutdown = new LinkedList<DisposableBean>();
@@ -70,15 +71,15 @@ public class AnnotationEventHandlerBeanPostProcessor
             return bean;
         }
         if (isNotEventHandlerSubclass(targetClass) && hasEventHandlerMethod(targetClass)) {
-            BufferingAnnotationEventHandlerAdapter adapter = createEventHandlerAdapter(bean);
+            BufferingAnnotationEventListenerAdapter adapter = createEventHandlerAdapter(bean);
             beansToDisposeOfAtShutdown.add(adapter);
             return createAdapterProxy(targetClass, bean, adapter);
         }
         return bean;
     }
 
-    private BufferingAnnotationEventHandlerAdapter createEventHandlerAdapter(Object bean) {
-        BufferingAnnotationEventHandlerAdapter adapter = adapt(bean);
+    private BufferingAnnotationEventListenerAdapter createEventHandlerAdapter(Object bean) {
+        BufferingAnnotationEventListenerAdapter adapter = adapt(bean);
         adapter.setApplicationContext(applicationContext);
         if (taskExecutor != null) {
             adapter.setTaskExecutor(taskExecutor);
@@ -86,17 +87,16 @@ public class AnnotationEventHandlerBeanPostProcessor
         try {
             adapter.afterPropertiesSet();
         } catch (Exception e) {
-            throw new BeansException("Error occurred while wrapping an event handler", e) {
-            };
+            throw new EventListenerAdapterException("Error occurred while wrapping an event listener", e);
         }
         return adapter;
     }
 
-    protected BufferingAnnotationEventHandlerAdapter adapt(Object bean) {
-        return new BufferingAnnotationEventHandlerAdapter(bean);
+    protected BufferingAnnotationEventListenerAdapter adapt(Object bean) {
+        return new BufferingAnnotationEventListenerAdapter(bean);
     }
 
-    private Object createAdapterProxy(Class targetClass, Object eventHandler, AnnotationEventHandlerAdapter adapter) {
+    private Object createAdapterProxy(Class targetClass, Object eventHandler, AnnotationEventListenerAdapter adapter) {
         Class[] adapterInterfaces = ClassUtils.getAllInterfaces(adapter);
 
         Enhancer enhancer = new Enhancer();
@@ -108,7 +108,7 @@ public class AnnotationEventHandlerBeanPostProcessor
     }
 
     private boolean isNotEventHandlerSubclass(Class<?> beanClass) {
-        return !nl.gridshore.cqrs.eventhandler.EventHandler.class.isAssignableFrom(beanClass);
+        return !EventListener.class.isAssignableFrom(beanClass);
     }
 
     private boolean hasEventHandlerMethod(Class<?> beanClass) {
@@ -144,11 +144,12 @@ public class AnnotationEventHandlerBeanPostProcessor
 
         private final Class[] adapterInterfaces;
 
-        private final AnnotationEventHandlerAdapter adapter;
+        private final AnnotationEventListenerAdapter adapter;
 
         private final Object bean;
 
-        public AdapterInvocationHandler(Class[] adapterInterfaces, AnnotationEventHandlerAdapter adapter, Object bean) {
+        public AdapterInvocationHandler(Class[] adapterInterfaces, AnnotationEventListenerAdapter adapter,
+                                        Object bean) {
             this.adapterInterfaces = adapterInterfaces;
             this.adapter = adapter;
             this.bean = bean;
@@ -173,4 +174,5 @@ public class AnnotationEventHandlerBeanPostProcessor
             return false;
         }
     }
+
 }

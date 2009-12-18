@@ -21,29 +21,56 @@ import org.joda.time.LocalDateTime;
 import java.util.UUID;
 
 /**
+ * Base class for all Domain Events. This class contains the basic behavior expected from any event to be processed by
+ * event sourcing engines or dispatchers.
+ *
  * @author Allard Buijze
  */
 public abstract class DomainEvent {
 
-    private Long sequenceNumber;
-    private UUID aggregateIdentifier;
+    private volatile Long sequenceNumber;
+    private volatile UUID aggregateIdentifier;
 
     private final LocalDateTime createDate;
     private final UUID eventIdentifier;
 
+    /**
+     * Initialize the domain event. Will set the current time stamp and generate a random event identifier.
+     */
     protected DomainEvent() {
         createDate = new LocalDateTime();
         eventIdentifier = UUID.randomUUID();
     }
 
+    /**
+     * Returns the identifier of this event.
+     *
+     * @return the identifier of this event.
+     */
     public UUID getEventIdentifier() {
         return eventIdentifier;
     }
 
+    /**
+     * Returns the sequence number of this event, if available. Will return null if this event has not been added to an
+     * {@link nl.gridshore.cqrs.EventContainer}.
+     *
+     * @return the sequence number of this event, or null if unknown.
+     */
     public Long getSequenceNumber() {
         return sequenceNumber;
     }
 
+    public UUID getAggregateIdentifier() {
+        return aggregateIdentifier;
+    }
+
+    /**
+     * Sets the sequence number of this event. May only be set once.
+     *
+     * @param sequenceNumber the sequence number to assign to this event
+     * @throws IllegalStateException if a sequence number was already assigned
+     */
     void setSequenceNumber(long sequenceNumber) {
         if (this.sequenceNumber != null) {
             throw new IllegalStateException("Sequence number may not be applied more than once.");
@@ -51,10 +78,12 @@ public abstract class DomainEvent {
         this.sequenceNumber = sequenceNumber;
     }
 
-    public UUID getAggregateIdentifier() {
-        return aggregateIdentifier;
-    }
-
+    /**
+     * Sets the aggregate identifier. May only be set once.
+     *
+     * @param aggregateIdentifier the aggregate identifier
+     * @throws IllegalStateException if an aggregate identifier was already assigned
+     */
     void setAggregateIdentifier(UUID aggregateIdentifier) {
         if (this.aggregateIdentifier != null) {
             throw new IllegalStateException("An aggregateIdentifier can not be applied more than once.");
@@ -62,6 +91,14 @@ public abstract class DomainEvent {
         this.aggregateIdentifier = aggregateIdentifier;
     }
 
+    /**
+     * Checks for equality of two events. Two events are equal when they have the same type, aggregate identifier, time
+     * stamp and sequence number. This allows to test for equality after one or more instances have been serialized and
+     * deserialized.
+     *
+     * @param o the other DomainEvent
+     * @return true when equals, otherwise false
+     */
     @SuppressWarnings({"RedundantIfStatement"})
     @Override
     public boolean equals(Object o) {
@@ -91,6 +128,8 @@ public abstract class DomainEvent {
 
     @Override
     public int hashCode() {
-        return createDate.hashCode();
+        int result = createDate != null ? createDate.hashCode() : 0;
+        result = 31 * result + (eventIdentifier != null ? eventIdentifier.hashCode() : 0);
+        return result;
     }
 }

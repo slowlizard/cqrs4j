@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * (but before any super class), the most specific event handler method is called. That means that if an event handler
  * for a class A and one for a class B are eligible, and B is a subclass of A, then the method with a parameter of type
  * B will be chosen<li>If no method is found in the actual class, its super class is evaluated. <li>If still no method
- * is found, the event handler ignores the event </ol>
+ * is found, the event listener ignores the event </ol>
  * <p/>
  * If you do not want any events to be ignored, but rather have some logging of the fact that an unhandled event came
  * by, make an abstract superclass that contains an event handler method that accepts {@link
@@ -42,8 +42,8 @@ import java.lang.annotation.Target;
  * behavior is undefined.
  *
  * @author Allard Buijze
- * @see nl.gridshore.cqrs.eventhandler.annotation.AnnotationEventHandlerAdapter
- * @see nl.gridshore.cqrs.eventhandler.annotation.TransactionalAnnotationEventHandlerAdapter
+ * @see AnnotationEventListenerAdapter
+ * @see TransactionalAnnotationEventListenerAdapter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -53,15 +53,15 @@ public @interface EventHandler {
      * The number of event handler calls that may be done in a transaction where the call to this event handler is part
      * of. Defaults to 50.
      * <p/>
-     * Setting this value to 1 will force event transaction aware {@link nl.gridshore.cqrs.eventhandler.EventHandler}s
+     * Setting this value to 1 will force event transaction aware {@link nl.gridshore.cqrs.eventhandler.EventListener}s
      * to execute the annotated method in a separate transaction.
      * <p/>
-     * Note that this value is ignored by {@link nl.gridshore.cqrs.eventhandler.EventHandler}s that are unaware of
+     * Note that this value is ignored by {@link nl.gridshore.cqrs.eventhandler.EventListener}s that are unaware of
      * transactional processing.
      *
      * @return an integer specifying the amount of events to deal with in a single transaction
      *
-     * @see nl.gridshore.cqrs.eventhandler.annotation.BufferingAnnotationEventHandlerAdapter
+     * @see BufferingAnnotationEventListenerAdapter
      */
     int commitThreshold() default 50;
 }

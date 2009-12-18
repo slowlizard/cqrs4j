@@ -3,6 +3,7 @@ package nl.gridshore.cqrs.eventhandler.annotation.postprocessor;
 import net.sf.cglib.proxy.Enhancer;
 import nl.gridshore.cqrs.DomainEvent;
 import nl.gridshore.cqrs.eventhandler.EventBus;
+import nl.gridshore.cqrs.eventhandler.EventListener;
 import nl.gridshore.cqrs.eventhandler.annotation.EventHandler;
 import org.junit.*;
 import org.springframework.context.ApplicationContext;
@@ -15,13 +16,13 @@ import static org.mockito.Mockito.*;
  */
 public class AnnotationEventHandlerBeanPostProcessorTest {
 
-    private AnnotationEventHandlerBeanPostProcessor testSubject;
+    private AnnotationEventListenerBeanPostProcessor testSubject;
     private ApplicationContext mockApplicationContext;
     private EventBus mockEventBus;
 
     @Before
     public void setUp() {
-        testSubject = spy(new AnnotationEventHandlerBeanPostProcessor());
+        testSubject = spy(new AnnotationEventListenerBeanPostProcessor());
         mockApplicationContext = mock(ApplicationContext.class);
         testSubject.setApplicationContext(mockApplicationContext);
         mockEventBus = mock(EventBus.class);
@@ -34,18 +35,18 @@ public class AnnotationEventHandlerBeanPostProcessorTest {
 
         assertTrue(Enhancer.isEnhanced(actualResult.getClass()));
         assertTrue(actualResult instanceof SimpleEventHandler);
-        assertTrue(actualResult instanceof nl.gridshore.cqrs.eventhandler.EventHandler);
+        assertTrue(actualResult instanceof EventListener);
 
-        verify(mockEventBus, times(1)).subscribe(isA(nl.gridshore.cqrs.eventhandler.EventHandler.class));
+        verify(mockEventBus, times(1)).subscribe(isA(EventListener.class));
 
         testSubject.destroy();
 
-        verify(mockEventBus, times(1)).unsubscribe(isA(nl.gridshore.cqrs.eventhandler.EventHandler.class));
+        verify(mockEventBus, times(1)).unsubscribe(isA(EventListener.class));
     }
 
     @Test
     public void testPostProcessBean_AlreadyHandlerIsNotEnhanced() {
-        RealEventHandler eventHandler = new RealEventHandler();
+        RealEventListener eventHandler = new RealEventListener();
         Object actualResult = testSubject.postProcessAfterInitialization(eventHandler, "beanName");
         assertFalse(Enhancer.isEnhanced(actualResult.getClass()));
         assertSame(eventHandler, actualResult);
@@ -72,7 +73,7 @@ public class AnnotationEventHandlerBeanPostProcessorTest {
         }
     }
 
-    public static class RealEventHandler implements nl.gridshore.cqrs.eventhandler.EventHandler {
+    public static class RealEventListener implements EventListener {
 
         @Override
         public boolean canHandle(Class<? extends DomainEvent> eventType) {

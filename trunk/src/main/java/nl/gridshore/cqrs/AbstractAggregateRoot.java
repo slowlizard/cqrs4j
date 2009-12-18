@@ -19,6 +19,10 @@ package nl.gridshore.cqrs;
 import java.util.UUID;
 
 /**
+ * Abstract convenience class to be extended by all aggregate roots. The AbstractAggregateRoot tracks all uncommitted
+ * events. It also provides convenience methods to initialize the state of the aggregate root based on an {@link
+ * nl.gridshore.cqrs.EventStream}, which can be used for event sourcing.
+ *
  * @author Allard Buijze
  */
 public abstract class AbstractAggregateRoot implements AggregateRoot {
@@ -26,15 +30,28 @@ public abstract class AbstractAggregateRoot implements AggregateRoot {
     private final EventContainer uncommittedEvents;
     private final UUID identifier;
 
+    /**
+     * Initializes the aggregate root using a random aggregate identifier.
+     */
     protected AbstractAggregateRoot() {
         this(UUID.randomUUID());
     }
 
+    /**
+     * Initializes the aggregate root using the provided aggregate identifier.
+     *
+     * @param identifier the identifier of this aggregate
+     */
     protected AbstractAggregateRoot(UUID identifier) {
         uncommittedEvents = new EventContainer(identifier);
         this.identifier = identifier;
     }
 
+    /**
+     * Initialize the state of this aggregate using the events in the provided {@link nl.gridshore.cqrs.EventStream}
+     *
+     * @param eventStream the event stream containing the events that describe the state changes of this aggregate
+     */
     protected void initializeState(EventStream eventStream) {
         long lastSequenceNumber = -1;
         while (eventStream.hasNext()) {
@@ -58,26 +75,40 @@ public abstract class AbstractAggregateRoot implements AggregateRoot {
 
     /**
      * Applies state changes based on the given event.
+     * <p/>
+     * Note: Implementations of this method should *not* perform validation.
      *
      * @param event The event to handle
      */
     protected abstract void handle(DomainEvent event);
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public EventStream getUncommittedEvents() {
         return uncommittedEvents.getInputStream();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UUID getIdentifier() {
         return identifier;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void commitEvents() {
         uncommittedEvents.clear();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getUncommittedEventCount() {
         return uncommittedEvents.size();
