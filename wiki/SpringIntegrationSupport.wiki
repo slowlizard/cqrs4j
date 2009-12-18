@@ -1,4 +1,5 @@
 #summary Spring Integration support
+#sidebar TableOfContents
 
 =Introduction=
 Spring Integration is a framework (by Spring) that allows easy implementation of a pipes-and-filters architecture, making integration with other components and applications (via JMS, filesystem, email, etc) a lot easier.
