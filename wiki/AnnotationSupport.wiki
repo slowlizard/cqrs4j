@@ -10,7 +10,7 @@ We strongly believe in the POJO programming model. Furthermore, the goal of _cqr
 
 Annotation support is automatically available to all aggregates that extend `AbstractAnnotatedAggregateRoot`.
 
-See [AnnotationSupport#Creating_an_annotated_event_handler] for information about the signature of annotated event handler methods.
+See [AnnotationSupport#Creating_an_annotated_event_handler Creating an annotated event handler] for information about the signature of annotated event handler methods.
 
 Here is an example of a simple aggregate using annotation support:
 {{{
