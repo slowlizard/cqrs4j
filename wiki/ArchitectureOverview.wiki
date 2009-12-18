@@ -1,3 +1,4 @@
 #summary Architectural overview of CQRS
+#sidebar TableOfContents
 
 http://cqrs4j.googlecode.com/files/cqrs_architecture.jpg
