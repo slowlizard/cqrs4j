@@ -28,19 +28,35 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * {@link nl.gridshore.cqrs.eventhandler.EventBus} implementation that delegates all subscription and publishing
+ * requests to a {@link org.springframework.integration.channel.SubscribableChannel Spring Integration channel}.
+ * <p/>
+ * Use {@link #setChannel(org.springframework.integration.channel.SubscribableChannel)} to set the channel to delegate
+ * all the requests to.
+ * <p/>
+ * This EventBus will automatically wrap and unwrap events in {@link org.springframework.integration.core.Message
+ * Messages} and {@link nl.gridshore.cqrs.eventhandler.EventListener EventListeners} in {@link
+ * org.springframework.integration.message.MessageHandler MessageHandlers}
+ *
  * @author Allard Buijze
  */
 public class SpringIntegrationEventBus implements EventBus {
 
     private SubscribableChannel channel;
-    private ConcurrentMap<EventListener, MessageHandler> handlers = new ConcurrentHashMap<EventListener, MessageHandler>();
+    private final ConcurrentMap<EventListener, MessageHandler> handlers = new ConcurrentHashMap<EventListener, MessageHandler>();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void unsubscribe(EventListener eventListener) {
         MessageHandler messageHandler = handlers.remove(eventListener);
         channel.unsubscribe(messageHandler);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void subscribe(EventListener eventListener) {
         MessageHandler messagehandler = new MessageHandlerAdapter(eventListener);
@@ -48,9 +64,21 @@ public class SpringIntegrationEventBus implements EventBus {
         channel.subscribe(messagehandler);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void publish(DomainEvent event) {
         channel.send(new GenericMessage<Object>(event));
+    }
+
+    /**
+     * Sets the Spring Integration Channel that this event bus should publish events to.
+     *
+     * @param channel the channel to publish events to
+     */
+    public void setChannel(SubscribableChannel channel) {
+        this.channel = channel;
     }
 
     private class MessageHandlerAdapter implements MessageHandler {
@@ -62,13 +90,8 @@ public class SpringIntegrationEventBus implements EventBus {
         }
 
         @Override
-        public void handleMessage(Message<?> message)
-                throws MessageHandlingException, MessageDeliveryException {
+        public void handleMessage(Message<?> message) throws MessageHandlingException, MessageDeliveryException {
             eventListener.handle((DomainEvent) message.getPayload());
         }
-    }
-
-    public void setChannel(SubscribableChannel channel) {
-        this.channel = channel;
     }
 }

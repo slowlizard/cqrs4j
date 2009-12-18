@@ -18,25 +18,38 @@ package nl.gridshore.cqrs.eventhandler;
 
 import nl.gridshore.cqrs.DomainEvent;
 
-import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
+ * Implementation of the {@link nl.gridshore.cqrs.eventhandler.EventBus} that directly forwards all published events (in
+ * the callers' thread) to all subscribed listeners.
+ *
  * @author Allard Buijze
  */
 public class SimpleEventBus implements EventBus {
 
-    private LinkedList<EventListener> listeners;
+    private final List<EventListener> listeners = new CopyOnWriteArrayList<EventListener>();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void unsubscribe(EventListener eventListener) {
         listeners.remove(eventListener);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void subscribe(EventListener eventListener) {
         listeners.add(eventListener);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void publish(DomainEvent event) {
         for (EventListener listener : listeners) {
