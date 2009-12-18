@@ -6,7 +6,26 @@
 
 We strongly believe in the POJO programming model. Furthermore, the goal of _cqrs4j_ is to relieve you of any plumbing and boilerplate coding. The annotation support features of _cqrs4j_ allow you to build plain event listeners (just extending object) and annotating the relevant event handling methods with `@EventHandler`.
 
+= Annotation support for aggregates =
 
+Annotation support is automatically available to all aggregates that extend `AbstractAnnotatedAggregateRoot`.
+
+See [AnnotationSupport#Creating_an_annotated_event_handler] for information about the signature of annotated event handler methods.
+
+Here is an example of a simple aggregate using annotation support:
+{{{
+public class Customer extends AbstractAnnotatedAggregateRoot {
+
+    public Customer(Address address, String name) {
+        apply(new NewCustomerEvent(address, name));
+    }
+
+    @EventHandler
+    protected void onNewCustomer(NewCustomerEvent newCustomerEvent) {
+        // do the state changes
+    }
+}
+}}}
 = Enabling annotation support =
 
 To enable annotation support, all you need to do is configure one of the annotation post processors in your spring context.
@@ -22,7 +41,7 @@ Configuring the annotation bean post processor is as easy as adding the followin
 </bean>
 }}}
 
-= Creating an annotated event listener =
+=Creating an annotated event handler=
 Creating an annotated event listener is pretty easy. You don't need to extend any special classes. All you need to do is annotate any methods that you want called when en event comes in with the `@EventHandler` annotation.
 
 There are, however, a few rules for these methods:
