@@ -5,3 +5,4 @@ Table of contents
  * [AnnotationSupport Annotation Support]
  * [SpringIntegrationSupport Spring Integration Support]
  * [EventSourcing Event Sourcing Support]
+ * [ArchitectureOverview Architecture Overview]
