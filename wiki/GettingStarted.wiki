@@ -1,5 +1,5 @@
 #summary Getting started guide
-#labels Featured,Priority-1
+#labels Featured
 #sidebar TableOfContents
 
 <wiki:toc max_depth="2" />
