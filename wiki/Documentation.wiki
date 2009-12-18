@@ -1,4 +1,5 @@
 #summary cqrs4j Documentation
+#labels Featured
 #sidebar TableOfContents
 
 = Getting Started =
