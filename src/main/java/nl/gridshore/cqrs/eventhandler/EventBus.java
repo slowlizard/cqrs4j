@@ -32,7 +32,7 @@ import nl.gridshore.cqrs.DomainEvent;
 public interface EventBus {
 
     /**
-     * Publish an event on this bus. It is forwarded to all subscribed event listeners.
+     * Publish an event on this bus. It is dispatched to all subscribed event listeners.
      *
      * @param event the event to publish
      */
