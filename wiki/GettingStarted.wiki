@@ -42,7 +42,7 @@ Below is a table of additional features and the extra dependencies you need:
 || [SpringIntegrationSupport Spring Integration support] || org.springframework.integration:spring-integration-core:1.0.3.RELEASE |||
 
 Note: the version numbers are the ones _cqrs4j_ has been tested with. Other versions might work, but might not.
-
+= Creating the CQRS building blocks =
 == Building an Aggregate ==
 All aggregates should implement the `AggregateRoot` interface. This interface describes that basic operations needed by the Repository to store and publish the generated events.
 
