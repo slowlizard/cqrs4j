@@ -1,0 +1,35 @@
+#summary Overview of the annotation support features of cqrs4j
+#labels Featured
+
+= Introduction =
+
+We strongly believe in the POJO programming model. Furthermore, the goal of _cqrs4j_ is to relieve you of any plumbing and boilerplate coding. The annotation support features of _cqrs4j_ allow you to build plain event listeners (just extending object) and annotating the relevant event handling methods with `@EventHandler`.
+
+
+= Enabling annotation support =
+
+To enable annotation support, all you need to do is configure one of the annotation post processors in your spring context.
+
+There are two annotation post processors available:
+# `AnnotationEventListenerBeanPostProcessor`, the simplest of the two, will automatically create a proxy for each bean containing `@EventHandler` annotated methods to turn them into a full blown event listener.
+# `TransactionalAnnotationEventListenerBeanPostProcessor` is a specialized version that provides support for transactional processing to your event handlers. This is useful if you are updating database tables using incoming events.
+
+Configuring the annotation bean post processor is as easy as adding the following XML to your application context:
+{{{
+<bean class="nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor.TransactionalAnnotationEventListenerBeanPostProcessor">
+    <property name="transactionManager" ref="transactionManager"/>
+</bean>
+}}}
+
+= Creating an annotated event listener =
+Creating an annotated event listener is pretty easy. You don't need to extend any special classes. All you need to do is annotate any methods that you want called when en event comes in with the `@EventHandler` annotation.
+
+There are, however, a few rules for these methods:
+* The method must accept 1 parameter
+* The parameter must be a subtype of {`DomainEvent`} 
+* Return values are allowed, but are ignored by dispatchers 
+* Exceptions are highly discouraged, and are likely to be caught and ignored by the dispatchers
+
+Once the annotation bean post processor is defined in the spring application context, all you need to to is add the bean definitions of your annotated event listeners to the context. That's it.
+
+ 
