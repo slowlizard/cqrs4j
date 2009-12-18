@@ -19,7 +19,7 @@
 
     <groupId>nl.gridshore.cqrs4j</groupId>
     <artifactId>cqrs4j</artifactId>
-    <version>0.2</version>
+    <version>0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <modelVersion>4.0.0</modelVersion>
@@ -191,8 +191,8 @@
         </repository>
     </distributionManagement>
     <scm>
-        <connection>scm:svn:http://cqrs4j.googlecode.com/svn/tags/cqrs4j-0.2</connection>
-        <developerConnection>scm:svn:https://cqrs4j.googlecode.com/svn/tags/cqrs4j-0.2</developerConnection>
-        <url>http://code.google.com/p/cqrs4j/source/browse/tags/cqrs4j-0.2</url>
+        <connection>scm:svn:http://cqrs4j.googlecode.com/svn/trunk</connection>
+        <developerConnection>scm:svn:https://cqrs4j.googlecode.com/svn/trunk</developerConnection>
+        <url>http://code.google.com/p/cqrs4j/source/browse/</url>
     </scm>
 </project>
