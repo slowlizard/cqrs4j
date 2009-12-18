@@ -1,0 +1,3 @@
+#summary Architectural overview of CQRS
+
+http://cqrs4j.googlecode.com/files/cqrs_architecture.jpg
