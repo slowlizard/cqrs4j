@@ -39,14 +39,14 @@ import java.util.UUID;
 public abstract class AbstractAnnotatedAggregateRoot extends AbstractAggregateRoot implements AggregateRoot {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractAnnotatedAggregateRoot.class);
-    private final AnnotationEventListenerInvoker eventListenerInvoker;
+    private final AnnotationEventHandlerInvoker eventHandlerInvoker;
 
     /**
      * Initialize the aggregate root with a random identifier
      */
     protected AbstractAnnotatedAggregateRoot() {
         super();
-        eventListenerInvoker = new AnnotationEventListenerInvoker(this);
+        eventHandlerInvoker = new AnnotationEventHandlerInvoker(this);
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class AbstractAnnotatedAggregateRoot extends AbstractAggregateRo
      */
     protected AbstractAnnotatedAggregateRoot(UUID identifier) {
         super(identifier);
-        eventListenerInvoker = new AnnotationEventListenerInvoker(this);
+        eventHandlerInvoker = new AnnotationEventHandlerInvoker(this);
     }
 
     /**
@@ -68,7 +68,7 @@ public abstract class AbstractAnnotatedAggregateRoot extends AbstractAggregateRo
      */
     @Override
     protected void handle(DomainEvent event) {
-        eventListenerInvoker.invokeEventHandlerMethod(event);
+        eventHandlerInvoker.invokeEventHandlerMethod(event);
     }
 
     /**

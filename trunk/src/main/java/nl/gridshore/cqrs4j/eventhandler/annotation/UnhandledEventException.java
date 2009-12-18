@@ -32,6 +32,12 @@ public class UnhandledEventException extends RuntimeException {
 
     private final DomainEvent unhandledEvent;
 
+    /**
+     * Initialize the exception with the given <code>message</code> and <code>unhandledEvent</code>.
+     *
+     * @param message        a descriptive message of the cause of the exception
+     * @param unhandledEvent The event for which no handler could be found
+     */
     public UnhandledEventException(String message, DomainEvent unhandledEvent) {
         super(message);
         this.unhandledEvent = unhandledEvent;

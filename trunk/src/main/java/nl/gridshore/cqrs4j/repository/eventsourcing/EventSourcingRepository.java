@@ -21,17 +21,27 @@ import nl.gridshore.cqrs4j.EventStream;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
 import nl.gridshore.cqrs4j.repository.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 
 import java.util.UUID;
 
 /**
+ * Abstract repository implementation that allows easy implementation of an Event Sourcing mechanism. It will
+ * automatically publish new events to the given {@link nl.gridshore.cqrs4j.eventhandler.EventBus} and delegate event
+ * storage to the provided {@link nl.gridshore.cqrs4j.repository.eventsourcing.EventStore}.
+ *
  * @author Allard Buijze
+ * @see nl.gridshore.cqrs4j.repository.eventsourcing.EventStore
+ * @see nl.gridshore.cqrs4j.repository.eventsourcing.XStreamFileSystemEventStore
  */
 public abstract class EventSourcingRepository<T extends AggregateRoot> implements Repository<T> {
 
-    protected EventStore eventStore = new XStreamFileSystemEventStore();
+    protected EventStore eventStore;
     protected EventBus eventBus;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void save(T aggregate) {
         eventStore.appendEvents(getTypeIdentifier(), aggregate.getUncommittedEvents());
@@ -42,6 +52,9 @@ public abstract class EventSourcingRepository<T extends AggregateRoot> implement
         aggregate.commitEvents();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings({"unchecked"})
     @Override
     public T load(UUID aggregateIdentifier) {
@@ -49,15 +62,44 @@ public abstract class EventSourcingRepository<T extends AggregateRoot> implement
         return instantiateAggregate(events);
     }
 
-    protected abstract T instantiateAggregate(EventStream events);
+    /**
+     * Instantiate the aggregate using the given event stream. You may use the {@link
+     * nl.gridshore.cqrs4j.AbstractAggregateRoot#initializeState(nl.gridshore.cqrs4j.EventStream)} method to initialize
+     * the aggregate's state.
+     *
+     * @param eventStream the event stream containing the historical events of the aggregate
+     * @return a fully initialized aggregate
+     */
+    protected abstract T instantiateAggregate(EventStream eventStream);
 
+    /**
+     * Returns the type identifier for this aggregate. The type identifier is used by the EventStore to organize data
+     * related to the same type of aggregate.
+     * <p/>
+     * Tip: in most cases, the simple class name would be a good start.
+     *
+     * @return the type identifier of the aggregates this repository stores
+     */
     protected abstract String getTypeIdentifier();
 
+    /**
+     * Sets the event bus to which newly stored events should be published. Optional. By default, the repository tries
+     * to autwowire the event bus.
+     *
+     * @param eventBus the event bus to publish events to
+     */
     @Autowired
+    @Required
     public void setEventBus(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Sets the event store that would physically store the events.
+     *
+     * @param eventStore the event bus to publish events to
+     */
+    @Required
     public void setEventStore(EventStore eventStore) {
         this.eventStore = eventStore;
     }

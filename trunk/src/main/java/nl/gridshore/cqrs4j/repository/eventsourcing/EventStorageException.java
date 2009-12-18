@@ -23,6 +23,12 @@ package nl.gridshore.cqrs4j.repository.eventsourcing;
  */
 public class EventStorageException extends RuntimeException {
 
+    /**
+     * Initialize the exception with the given <code>message</code> and <code>cause</code>
+     *
+     * @param message a detailed message of the cause of the exception
+     * @param cause   the original cause of this exception
+     */
     public EventStorageException(String message, Throwable cause) {
         super(message, cause);
     }

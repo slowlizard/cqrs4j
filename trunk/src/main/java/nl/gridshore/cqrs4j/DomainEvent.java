@@ -126,6 +126,9 @@ public abstract class DomainEvent {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         int result = createDate != null ? createDate.hashCode() : 0;

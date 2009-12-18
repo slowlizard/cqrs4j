@@ -57,6 +57,9 @@ public class XStreamFileSystemEventStore implements EventStore {
     private XStream xStream;
     private Resource baseDir;
 
+    /**
+     * Basic initialization of the event store.
+     */
     public XStreamFileSystemEventStore() {
         xStream = new XStream();
         xStream.registerConverter(new SingleValueConverter() {

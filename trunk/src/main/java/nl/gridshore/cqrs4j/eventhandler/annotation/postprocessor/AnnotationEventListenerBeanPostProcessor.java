@@ -59,11 +59,17 @@ public class AnnotationEventListenerBeanPostProcessor
     private AsyncTaskExecutor taskExecutor;
     private ApplicationContext applicationContext;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         return bean;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
         Class<?> targetClass = bean.getClass();
@@ -92,6 +98,13 @@ public class AnnotationEventListenerBeanPostProcessor
         return adapter;
     }
 
+    /**
+     * Create a BufferingAnnotationEventListenerAdapter (or subclass) for the given bean. Specialized implementations
+     * should override this method if they wish to create a different type of adapter for the givven bean.
+     *
+     * @param bean the bean for which to create an adapter
+     * @return the adapter for the given bean
+     */
     protected BufferingAnnotationEventListenerAdapter adapt(Object bean) {
         return new BufferingAnnotationEventListenerAdapter(bean);
     }
@@ -124,6 +137,9 @@ public class AnnotationEventListenerBeanPostProcessor
         return result.get();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void destroy() throws Exception {
         for (DisposableBean bean : beansToDisposeOfAtShutdown) {
@@ -131,11 +147,20 @@ public class AnnotationEventListenerBeanPostProcessor
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
+    /**
+     * The task executor that the adapters should use to host the pollers thread. Optional. By default, a new single
+     * thread task executor is created.
+     *
+     * @param taskExecutor the task executor that should host the adapters poller thread
+     */
     public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }

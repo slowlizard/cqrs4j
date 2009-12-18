@@ -25,6 +25,12 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
 
     private PlatformTransactionManager transactionManager;
 
+    /**
+     * Specialized implementation of the adapt method that creates a Transaction aware adapter for transactional event
+     * listeners.
+     *
+     * @param bean the bean to adapt
+     */
     @Override
     protected BufferingAnnotationEventListenerAdapter adapt(Object bean) {
         if (!isTransactional(bean)) {
@@ -60,6 +66,11 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
         return bean.getClass().isAnnotationPresent(Transactional.class);
     }
 
+    /**
+     * Sets the transaction manager to use when processing events transactionally
+     *
+     * @param transactionManager the transaction manager to use when processing events transactionally
+     */
     public void setTransactionManager(PlatformTransactionManager transactionManager) {
         this.transactionManager = transactionManager;
     }
