@@ -1,6 +1,6 @@
-#summary Entry page to all documentation
+#summary cqrs4j Documentation
 #sidebar TableOfContents
 
-= Introduction =
+= Getting Started =
 
-TODO. Discuss cqrs4j.
+See the [GettingStarted Getting Started] page how you can get a head start with your CQRS implementation using _cqrs4j_
