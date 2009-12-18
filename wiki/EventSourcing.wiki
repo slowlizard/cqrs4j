@@ -1,4 +1,6 @@
 #summary Event Sourcing support
+#sidebar TableOfContents
+
 = Introduction =
 Event Sourcing is the process of using the events as primary source of information to restore the state of an aggregate. This concept allows you to use the actual source of aggregate state as your audit trail.
 
