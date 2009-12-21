@@ -1,8 +1,8 @@
 #summary Table of contents
 
 Table of contents
+ * [ArchitectureOverview Architecture Overview]
  * [GettingStarted Getting Started]
  * [AnnotationSupport Annotation Support]
  * [SpringIntegrationSupport Spring Integration Support]
  * [EventSourcing Event Sourcing Support]
- * [ArchitectureOverview Architecture Overview]
