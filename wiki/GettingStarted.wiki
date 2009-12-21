@@ -48,7 +48,7 @@ All aggregates should implement the `AggregateRoot` interface. This interface de
 
 To support you with the implementation, there are two abstract implementations of this interface: `AbstractAggregateRoot` and `AbstractAnnotatedAggregateRoot`. 
 
-The first is a basic implementation that requires you to override the `handle` method to implement the state change logic. This abstract class provides an `apply` method that you can call in your business logic method to have an event applied. The `AbstractAggregateRoot` will keep track of all uncommitted applied events and make shure they are forwarded to the `EventBus` when the aggregate is saved.
+The first is a basic implementation that requires you to override the `handle` method to implement the state change logic. This abstract class provides an `apply` method that you can call in your business logic method to have an event applied. The `AbstractAggregateRoot` will keep track of all uncommitted applied events and make sure they are forwarded to the `EventBus` when the aggregate is saved.
 
 The `AbstractAnnotatedAggregateRoot` is a specialization of the `AbstractAggregateRoot` that provides `@EventHandler` annotation support to your aggregate. See AnnotationSupport for more information.
 
