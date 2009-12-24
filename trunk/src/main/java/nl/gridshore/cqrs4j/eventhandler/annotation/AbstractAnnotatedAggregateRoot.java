@@ -80,7 +80,7 @@ public abstract class AbstractAnnotatedAggregateRoot extends AbstractAggregateRo
      */
     @EventHandler
     protected void onUnhandledEvents(DomainEvent event) {
-        String message = String.format("No EventListener method could be found for [%s] on aggregate [%s]",
+        String message = String.format("No EventHandler method could be found for [%s] on aggregate [%s]",
                                        event.getClass().getSimpleName(),
                                        getClass().getSimpleName());
         logger.error(message);
