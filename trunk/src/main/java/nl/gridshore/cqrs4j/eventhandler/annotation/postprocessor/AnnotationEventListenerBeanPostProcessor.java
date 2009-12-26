@@ -39,6 +39,9 @@ public class AnnotationEventListenerBeanPostProcessor extends BaseAnnotationEven
 
     private AsyncTaskExecutor taskExecutor;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected BufferingAnnotationEventListenerAdapter createEventHandlerAdapter(Object bean) {
         BufferingAnnotationEventListenerAdapter adapter = adapt(bean);
@@ -75,6 +78,5 @@ public class AnnotationEventListenerBeanPostProcessor extends BaseAnnotationEven
         this.taskExecutor = taskExecutor;
     }
 
-    
 
 }

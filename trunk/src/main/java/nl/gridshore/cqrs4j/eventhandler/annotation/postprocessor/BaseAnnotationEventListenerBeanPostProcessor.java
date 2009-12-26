@@ -21,7 +21,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Allard Buijze
  */
-public abstract class BaseAnnotationEventListenerBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware, DisposableBean {
+public abstract class BaseAnnotationEventListenerBeanPostProcessor
+        implements BeanPostProcessor, ApplicationContextAware, DisposableBean {
 
     private final List<DisposableBean> beansToDisposeOfAtShutdown = new LinkedList<DisposableBean>();
     protected ApplicationContext applicationContext;
@@ -51,6 +52,13 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor implements Be
         return bean;
     }
 
+    /**
+     * Create an AnnotationEventListenerAdapter instance of the given {@code bean}. This adapter will receive all event
+     * handler calls to be handled by this bean.
+     *
+     * @param bean The bean that the EventListenerAdapter has to adapt
+     * @return an event handler adapter for the given {@code bean}
+     */
     protected abstract AnnotationEventListenerAdapter createEventHandlerAdapter(Object bean);
 
     private Object createAdapterProxy(Class targetClass, Object eventHandler, AnnotationEventListenerAdapter adapter) {
