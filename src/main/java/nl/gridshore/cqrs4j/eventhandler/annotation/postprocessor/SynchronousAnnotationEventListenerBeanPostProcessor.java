@@ -25,6 +25,11 @@ public class SynchronousAnnotationEventListenerBeanPostProcessor extends BaseAnn
         AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(bean);
         adapter.setApplicationContext(applicationContext);
         adapter.setEventBus(eventBus);
+        try {
+            adapter.afterPropertiesSet();
+        } catch (Exception e) {
+            throw new EventListenerAdapterException("Error occurred while wrapping an event listener", e);
+        }
         return adapter;
     }
 
