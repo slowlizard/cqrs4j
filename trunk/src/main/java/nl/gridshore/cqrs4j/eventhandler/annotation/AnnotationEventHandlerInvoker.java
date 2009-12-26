@@ -141,7 +141,7 @@ class AnnotationEventHandlerInvoker {
      * @param eventClass the event class to find an handler for
      * @return true if an event handler is found, false otherwise
      */
-    protected boolean canHandle(Class<? extends DomainEvent> eventClass) {
+    protected boolean hasHandlerFor(Class<? extends DomainEvent> eventClass) {
         return findEventHandlerMethod(eventClass) != null;
     }
 

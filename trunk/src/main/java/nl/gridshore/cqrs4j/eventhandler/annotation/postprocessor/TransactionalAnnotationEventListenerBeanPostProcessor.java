@@ -15,6 +15,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * availability of a {@link org.springframework.transaction.annotation.Transactional} annotation. If one is found, a
  * {@link nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter transaction aware
  * event listener adapter} is used to adapt the bean.
+ * <p/>
+ * Note: even if only a single method is marked as {@link org.springframework.transaction.annotation.Transactional}, all
+ * event handlers will be called within a transaction.
  *
  * @author Allard Buijze
  * @see org.springframework.transaction.annotation.Transactional
