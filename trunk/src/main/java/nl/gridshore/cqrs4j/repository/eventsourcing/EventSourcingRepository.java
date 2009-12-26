@@ -16,7 +16,7 @@
 
 package nl.gridshore.cqrs4j.repository.eventsourcing;
 
-import nl.gridshore.cqrs4j.AggregateRoot;
+import nl.gridshore.cqrs4j.EventSourcedAggregateRoot;
 import nl.gridshore.cqrs4j.EventStream;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
 import nl.gridshore.cqrs4j.repository.Repository;
@@ -31,10 +31,13 @@ import java.util.UUID;
  * storage to the provided {@link nl.gridshore.cqrs4j.repository.eventsourcing.EventStore}.
  *
  * @author Allard Buijze
+ * @see nl.gridshore.cqrs4j.EventSourcedAggregateRoot
+ * @see nl.gridshore.cqrs4j.AbstractAggregateRoot
+ * @see nl.gridshore.cqrs4j.eventhandler.annotation.AbstractAnnotatedAggregateRoot
  * @see nl.gridshore.cqrs4j.repository.eventsourcing.EventStore
  * @see nl.gridshore.cqrs4j.repository.eventsourcing.XStreamFileSystemEventStore
  */
-public abstract class EventSourcingRepository<T extends AggregateRoot> implements Repository<T> {
+public abstract class EventSourcingRepository<T extends EventSourcedAggregateRoot> implements Repository<T> {
 
     protected EventStore eventStore;
     protected EventBus eventBus;
@@ -59,18 +62,19 @@ public abstract class EventSourcingRepository<T extends AggregateRoot> implement
     @Override
     public T load(UUID aggregateIdentifier) {
         EventStream events = eventStore.readEvents(getTypeIdentifier(), aggregateIdentifier);
-        return instantiateAggregate(events);
+        T aggregate = instantiateAggregate(events.getAggregateIdentifier());
+        aggregate.initializeState(events);
+        return aggregate;
     }
 
     /**
-     * Instantiate the aggregate using the given event stream. You may use the {@link
-     * nl.gridshore.cqrs4j.AbstractAggregateRoot#initializeState(nl.gridshore.cqrs4j.EventStream)} method to initialize
-     * the aggregate's state.
+     * Instantiate the aggregate using the given aggregate identifier. Aggregate state should *not* be initialized by
+     * this method. That means, no events should be applied by a call to this method.
      *
-     * @param eventStream the event stream containing the historical events of the aggregate
+     * @param aggregateIdentifier the aggregate identifier of the aggregate to instantiate
      * @return a fully initialized aggregate
      */
-    protected abstract T instantiateAggregate(EventStream eventStream);
+    protected abstract T instantiateAggregate(UUID aggregateIdentifier);
 
     /**
      * Returns the type identifier for this aggregate. The type identifier is used by the EventStore to organize data
