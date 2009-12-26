@@ -32,7 +32,7 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
      * @param bean the bean to adapt
      */
     @Override
-    protected BufferingAnnotationEventListenerAdapter adapt(Object bean) {
+    protected BufferingAnnotationEventListenerAdapter createAdapterFor(Object bean) {
         if (!isTransactional(bean)) {
             return new BufferingAnnotationEventListenerAdapter(bean);
         }
@@ -45,11 +45,18 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
         return adapter;
     }
 
+    /**
+     * Indicates whether the given bean has any @Transactional annotations are present, either on the class or on a
+     * method.
+     *
+     * @param bean The object to search annotations on
+     * @return true if bean is marked as transactional
+     */
     private boolean isTransactional(Object bean) {
-        return annotationOnClass(bean) || annotationOnMethod(bean);
+        return transactionalAnnotationOnClass(bean) || transactionalAnnotationOnMethod(bean);
     }
 
-    private boolean annotationOnMethod(Object bean) {
+    private boolean transactionalAnnotationOnMethod(Object bean) {
         final AtomicBoolean found = new AtomicBoolean(false);
         ReflectionUtils.doWithMethods(bean.getClass(), new ReflectionUtils.MethodCallback() {
             @Override
@@ -62,7 +69,7 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
         return found.get();
     }
 
-    private boolean annotationOnClass(Object bean) {
+    private boolean transactionalAnnotationOnClass(Object bean) {
         return bean.getClass().isAnnotationPresent(Transactional.class);
     }
 
