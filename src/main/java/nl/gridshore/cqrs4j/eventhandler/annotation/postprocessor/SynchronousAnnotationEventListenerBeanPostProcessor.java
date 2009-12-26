@@ -1,5 +1,6 @@
 package nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor;
 
+import nl.gridshore.cqrs4j.eventhandler.EventBus;
 import nl.gridshore.cqrs4j.eventhandler.annotation.AnnotationEventListenerAdapter;
 
 /**
@@ -14,11 +15,20 @@ import nl.gridshore.cqrs4j.eventhandler.annotation.AnnotationEventListenerAdapte
  */
 public class SynchronousAnnotationEventListenerBeanPostProcessor extends BaseAnnotationEventListenerBeanPostProcessor {
 
+    private EventBus eventBus;
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected AnnotationEventListenerAdapter createEventHandlerAdapter(Object bean) {
-        return new AnnotationEventListenerAdapter(bean);
+        AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(bean);
+        adapter.setApplicationContext(applicationContext);
+        adapter.setEventBus(eventBus);
+        return adapter;
+    }
+
+    public void setEventBus(EventBus eventBus) {
+        this.eventBus = eventBus;
     }
 }
