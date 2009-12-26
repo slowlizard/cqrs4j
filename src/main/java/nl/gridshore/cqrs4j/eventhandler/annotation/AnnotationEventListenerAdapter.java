@@ -59,7 +59,7 @@ public class AnnotationEventListenerAdapter
      */
     @Override
     public boolean canHandle(Class<? extends DomainEvent> eventType) {
-        return eventHandlerInvoker.canHandle(eventType);
+        return eventHandlerInvoker.hasHandlerFor(eventType);
     }
 
     /**
