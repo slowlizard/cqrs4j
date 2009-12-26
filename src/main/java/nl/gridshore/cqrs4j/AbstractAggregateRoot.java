@@ -16,6 +16,8 @@
 
 package nl.gridshore.cqrs4j;
 
+import org.springframework.util.Assert;
+
 import java.util.UUID;
 
 /**
@@ -25,7 +27,7 @@ import java.util.UUID;
  *
  * @author Allard Buijze
  */
-public abstract class AbstractAggregateRoot implements AggregateRoot {
+public abstract class AbstractAggregateRoot implements EventSourcedAggregateRoot {
 
     private final EventContainer uncommittedEvents;
     private final UUID identifier;
@@ -48,11 +50,11 @@ public abstract class AbstractAggregateRoot implements AggregateRoot {
     }
 
     /**
-     * Initialize the state of this aggregate using the events in the provided {@link nl.gridshore.cqrs4j.EventStream}
-     *
-     * @param eventStream the event stream containing the events that describe the state changes of this aggregate
+     * {@inheritDoc}
      */
-    protected void initializeState(EventStream eventStream) {
+    @Override
+    public void initializeState(EventStream eventStream) {
+        Assert.state(uncommittedEvents.size() == 0, "Aggregate is already initialized");
         long lastSequenceNumber = -1;
         while (eventStream.hasNext()) {
             DomainEvent event = eventStream.next();
@@ -74,7 +76,7 @@ public abstract class AbstractAggregateRoot implements AggregateRoot {
     }
 
     /**
-     * Applies state changes based on the given event.
+     * Apply state changes based on the given event.
      * <p/>
      * Note: Implementations of this method should *not* perform validation.
      *
