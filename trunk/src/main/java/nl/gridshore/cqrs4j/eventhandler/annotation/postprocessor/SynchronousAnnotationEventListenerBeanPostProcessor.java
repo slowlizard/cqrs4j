@@ -1,6 +1,5 @@
 package nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor;
 
-import nl.gridshore.cqrs4j.eventhandler.EventBus;
 import nl.gridshore.cqrs4j.eventhandler.annotation.AnnotationEventListenerAdapter;
 
 /**
@@ -8,32 +7,18 @@ import nl.gridshore.cqrs4j.eventhandler.annotation.AnnotationEventListenerAdapte
  * nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler} annotated methods.
  * <p/>
  * The beans processed by this bean post processor will handle events in the thread that delivers them. This makes this
- * post processor useful in the case of tests or when the dispatching mechanism takes care of asynchronous (but
- * sequential) event delivery.
+ * post processor useful in the case of tests or when the dispatching mechanism takes care of asynchronous event
+ * delivery.
  *
  * @author Allard Buijze
  */
 public class SynchronousAnnotationEventListenerBeanPostProcessor extends BaseAnnotationEventListenerBeanPostProcessor {
 
-    private EventBus eventBus;
-
     /**
      * {@inheritDoc}
      */
     @Override
-    protected AnnotationEventListenerAdapter createEventHandlerAdapter(Object bean) {
-        AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(bean);
-        adapter.setApplicationContext(applicationContext);
-        adapter.setEventBus(eventBus);
-        try {
-            adapter.afterPropertiesSet();
-        } catch (Exception e) {
-            throw new EventListenerAdapterException("Error occurred while wrapping an event listener", e);
-        }
-        return adapter;
-    }
-
-    public void setEventBus(EventBus eventBus) {
-        this.eventBus = eventBus;
+    protected AnnotationEventListenerAdapter adapt(Object bean) {
+        return new AnnotationEventListenerAdapter(bean);
     }
 }

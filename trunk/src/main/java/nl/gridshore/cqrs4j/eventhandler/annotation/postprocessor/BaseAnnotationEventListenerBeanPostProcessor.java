@@ -2,9 +2,12 @@ package nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
+import nl.gridshore.cqrs4j.eventhandler.EventBus;
 import nl.gridshore.cqrs4j.eventhandler.EventListener;
 import nl.gridshore.cqrs4j.eventhandler.annotation.AnnotationEventListenerAdapter;
 import nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -24,8 +27,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class BaseAnnotationEventListenerBeanPostProcessor
         implements BeanPostProcessor, ApplicationContextAware, DisposableBean {
 
+    private static final Logger logger = LoggerFactory.getLogger(BaseAnnotationEventListenerBeanPostProcessor.class);
+
     private final List<DisposableBean> beansToDisposeOfAtShutdown = new LinkedList<DisposableBean>();
-    protected ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
+    private EventBus eventBus;
 
     /**
      * {@inheritDoc}
@@ -45,7 +51,7 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
             return bean;
         }
         if (isNotEventHandlerSubclass(targetClass) && hasEventHandlerMethod(targetClass)) {
-            AnnotationEventListenerAdapter adapter = createEventHandlerAdapter(bean);
+            AnnotationEventListenerAdapter adapter = initializeAdapterFor(bean);
             beansToDisposeOfAtShutdown.add(adapter);
             return createAdapterProxy(targetClass, bean, adapter);
         }
@@ -59,7 +65,28 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
      * @param bean The bean that the EventListenerAdapter has to adapt
      * @return an event handler adapter for the given {@code bean}
      */
-    protected abstract AnnotationEventListenerAdapter createEventHandlerAdapter(Object bean);
+    private AnnotationEventListenerAdapter initializeAdapterFor(Object bean) {
+        AnnotationEventListenerAdapter adapter = adapt(bean);
+        adapter.setApplicationContext(applicationContext);
+        adapter.setEventBus(eventBus);
+        try {
+            adapter.afterPropertiesSet();
+        } catch (Exception e) {
+            String message = String.format("An error occurred while wrapping an event listener: [%s]",
+                                           bean.getClass().getSimpleName());
+            logger.error(message, e);
+            throw new EventListenerAdapterException(message, e);
+        }
+        return adapter;
+    }
+
+    /**
+     * Instantiate and perform implementation specific initialisation an event listener adapter for the given bean
+     *
+     * @param bean The bean for which to create an adapter
+     * @return the adapter for the given bean
+     */
+    protected abstract AnnotationEventListenerAdapter adapt(Object bean);
 
     private Object createAdapterProxy(Class targetClass, Object eventHandler, AnnotationEventListenerAdapter adapter) {
         Class[] adapterInterfaces = ClassUtils.getAllInterfaces(adapter);
@@ -97,6 +124,10 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
         for (DisposableBean bean : beansToDisposeOfAtShutdown) {
             bean.destroy();
         }
+    }
+
+    public void setEventBus(EventBus eventBus) {
+        this.eventBus = eventBus;
     }
 
     /**

@@ -40,31 +40,29 @@ public class AnnotationEventListenerBeanPostProcessor extends BaseAnnotationEven
     private AsyncTaskExecutor taskExecutor;
 
     /**
-     * {@inheritDoc}
+     * Creates a BufferingAnnotationEventListenerAdapter for the given bean. For implementation specific modifications,
+     * subclasses should implement the {@link #createAdapterFor(Object)} method.
+     *
+     * @param bean The bean for which to create an adapter
+     * @return a BufferingAnnotationEventListenerAdapter for the given bean
      */
     @Override
-    protected BufferingAnnotationEventListenerAdapter createEventHandlerAdapter(Object bean) {
-        BufferingAnnotationEventListenerAdapter adapter = adapt(bean);
-        adapter.setApplicationContext(applicationContext);
+    protected BufferingAnnotationEventListenerAdapter adapt(Object bean) {
+        BufferingAnnotationEventListenerAdapter adapter = createAdapterFor(bean);
         if (taskExecutor != null) {
             adapter.setTaskExecutor(taskExecutor);
-        }
-        try {
-            adapter.afterPropertiesSet();
-        } catch (Exception e) {
-            throw new EventListenerAdapterException("Error occurred while wrapping an event listener", e);
         }
         return adapter;
     }
 
     /**
      * Create a BufferingAnnotationEventListenerAdapter (or subclass) for the given bean. Specialized implementations
-     * should override this method if they wish to create a different type of adapter for the givven bean.
+     * should override this method if they wish to create a different type of adapter for the given bean.
      *
      * @param bean the bean for which to create an adapter
      * @return the adapter for the given bean
      */
-    protected BufferingAnnotationEventListenerAdapter adapt(Object bean) {
+    protected BufferingAnnotationEventListenerAdapter createAdapterFor(Object bean) {
         return new BufferingAnnotationEventListenerAdapter(bean);
     }
 
