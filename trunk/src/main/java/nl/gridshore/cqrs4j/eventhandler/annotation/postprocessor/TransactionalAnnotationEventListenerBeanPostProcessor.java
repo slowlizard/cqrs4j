@@ -105,8 +105,10 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
      * Set the amount of milliseconds the poller should wait before retrying a transaction when one has failed. If the
      * value if negative, retrying is disabled on any transactional event handlers.
      * <p/>
-     * Transactions are only subject to retrying if they failed with a {@link org.springframework.dao.TransientDataAccessException}
-     * or a {@link java.sql.SQLTransientException} Any other exception will cause an entire batch to be ignored.
+     * Transactions that failed due to one of the following exceptions are retried: <ul> <li>{@link
+     * org.springframework.dao.RecoverableDataAccessException} <li>{@link org.springframework.dao.TransientDataAccessException}
+     * <li>{@link java.sql.SQLTransientException} <li>{@link org.springframework.transaction.TransactionException}
+     * <li>{@link java.sql.BatchUpdateException} <li>{@link java.sql.SQLRecoverableException} </ul>
      * <p/>
      * Defaults to 1000 (1 second)
      *
