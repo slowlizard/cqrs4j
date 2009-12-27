@@ -43,6 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TransactionalAnnotationEventListenerBeanPostProcessor extends AnnotationEventListenerBeanPostProcessor {
 
     private PlatformTransactionManager transactionManager;
+    private long retryDelayMillis = 1000;
 
     /**
      * Specialized implementation of the adapt method that creates a Transaction aware adapter for transactional event
@@ -57,9 +58,8 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
         }
         TransactionalAnnotationEventListenerAdapter adapter = new TransactionalAnnotationEventListenerAdapter(bean);
 
-        if (transactionManager != null) {
-            adapter.setTransactionManager(transactionManager);
-        }
+        adapter.setTransactionManager(transactionManager);
+        adapter.setRetryDelayMillis(retryDelayMillis);
 
         return adapter;
     }
@@ -101,4 +101,18 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
         this.transactionManager = transactionManager;
     }
 
+    /**
+     * Set the amount of milliseconds the poller should wait before retrying a transaction when one has failed. If the
+     * value if negative, retrying is disabled on any transactional event handlers.
+     * <p/>
+     * Transactions are only subject to retrying if they failed with a {@link org.springframework.dao.TransientDataAccessException}
+     * or a {@link java.sql.SQLTransientException} Any other exception will cause an entire batch to be ignored.
+     * <p/>
+     * Defaults to 1000 (1 second)
+     *
+     * @param retryDelayMillis the amount of milliseconds to wait beforer retrying a transaction
+     */
+    public void setRetryDelayMillis(long retryDelayMillis) {
+        this.retryDelayMillis = retryDelayMillis;
+    }
 }

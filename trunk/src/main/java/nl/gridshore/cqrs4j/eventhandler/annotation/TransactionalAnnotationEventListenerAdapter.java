@@ -20,11 +20,13 @@ import nl.gridshore.cqrs4j.DomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.sql.SQLTransientException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +48,7 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
     private static final Logger logger = LoggerFactory.getLogger(TransactionalAnnotationEventListenerAdapter.class);
 
     private PlatformTransactionManager transactionManager;
+    private long retryDelayMillis = 1000;
 
     /**
      * Initialize the TransactionalAnnotationEventListenerAdapter for the given <code>annotatedEventListener</code>.
@@ -61,10 +64,16 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
      */
     @Override
     protected Runnable createPoller() {
-        return new TransactionalPoller();
+        return new TransactionalPoller(transactionManager);
     }
 
     private class TransactionalPoller implements Runnable {
+
+        private final TransactionTemplate transactionTemplate;
+
+        private TransactionalPoller(PlatformTransactionManager transactionManager) {
+            transactionTemplate = new TransactionTemplate(transactionManager);
+        }
 
         @Override
         public void run() {
@@ -95,13 +104,24 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
             while ((event = getNextEventFromQueue()) != null) {
                 if (canHandle(event.getClass())) {
                     configuration = getConfigurationFor(event);
-                    if (transactionCommitThreshold < eventBatch.size()) {
-                        // the poll cannot return null, as the peek said to and the queue is not shared
+                    if (eventFitsInBatch(transactionCommitThreshold, configuration.commitThreshold(), eventBatch)) {
                         eventBatch.add(event);
                         transactionCommitThreshold = Math.min(transactionCommitThreshold,
                                                               configuration.commitThreshold());
                     } else {
-                        processEventBatch(eventBatch);
+                        try {
+                            processEventBatch(eventBatch);
+                        }
+                        catch (RuntimeException e) {
+                            if (isTransientException(e)) {
+                                logger.warn("An exception occurred in a transaction.", e);
+                                if (retryDelayMillis >= 0) {
+                                    retryBatch(eventBatch);
+                                }
+                            } else {
+                                throw e;
+                            }
+                        }
                         eventBatch.clear();
                         eventBatch.add(event);
                         transactionCommitThreshold = configuration.commitThreshold();
@@ -112,11 +132,49 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
             processEventBatch(eventBatch);
         }
 
+        private boolean eventFitsInBatch(int currentTransactionCommitThreshold,
+                                         int nextTransactionCommitThreshold,
+                                         List<DomainEvent> eventBatch) {
+            int transactionCommitThreshold = Math.min(currentTransactionCommitThreshold,
+                                                      nextTransactionCommitThreshold);
+            return transactionCommitThreshold >= eventBatch.size() + 1;
+        }
+
+        private boolean isTransientException(Throwable e) {
+            if (e instanceof TransientDataAccessException || e instanceof SQLTransientException) {
+                return true;
+            }
+            if (e.getCause() != null) {
+                return isTransientException(e.getCause());
+            }
+            return false;
+        }
+
+        private void retryBatch(List<DomainEvent> eventBatch) {
+            boolean shouldContinue = true;
+            while (shouldContinue && isRunning()) {
+                logger.info("Retrying in {} milliseconds", retryDelayMillis);
+                try {
+                    Thread.sleep(retryDelayMillis);
+                    processEventBatch(eventBatch);
+                    shouldContinue = false;
+                }
+                catch (InterruptedException e) {
+                    logger.error("Thread was interrupted while in retry mode. Ignoring failed transaction.");
+                    shouldContinue = false;
+                }
+                catch (RuntimeException ex) {
+                    shouldContinue = isTransientException(ex);
+                    logger.warn("An exception occurred while retrying a transaction: " + ex.getMessage());
+                }
+            }
+        }
+
         private void processEventBatch(final List<DomainEvent> eventBatch) {
             if (eventBatch.size() == 0) {
                 return;
             }
-            new TransactionTemplate(transactionManager).execute(new TransactionCallbackWithoutResult() {
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                 @Override
                 protected void doInTransactionWithoutResult(TransactionStatus status) {
                     logger.debug("Started transaction for " + eventBatch.size() + " events");
@@ -136,6 +194,24 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
     @Required
     public void setTransactionManager(PlatformTransactionManager transactionManager) {
         this.transactionManager = transactionManager;
+    }
+
+    /**
+     * Sets the delay in milliseconds that the adapter should wait before reattempting any failed transactions. Provide
+     * a negative value to disable retrying. In that case, all events handled in the failed transaction are ignored.
+     * <p/>
+     * Transactions are only subject to retrying if they failed with a {@link org.springframework.dao.TransientDataAccessException}
+     * or a {@link java.sql.SQLTransientException} Any other exception will cause an entire batch to be ignored.
+     * <p/>
+     * It is not recommended changing this value once the poller thread is running. The poller may cache this value for
+     * performance reasons and could ignore any changed values.
+     * <p/>
+     * Defaults to 1000 (1 second)
+     *
+     * @param retryDelayMillis the number of milliseconds to wait before retrying a transaction
+     */
+    public void setRetryDelayMillis(long retryDelayMillis) {
+        this.retryDelayMillis = retryDelayMillis;
     }
 
 }
