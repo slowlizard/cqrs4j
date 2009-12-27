@@ -34,7 +34,7 @@ public class EventSourcingRepositoryTest {
     }
 
     @Test
-    public void testLoadAggregate() {
+    public void testLoadAndSaveAggregate() {
         UUID identifier = UUID.randomUUID();
         StubDomainEvent event1 = new StubDomainEvent(identifier, 1);
         StubDomainEvent event2 = new StubDomainEvent(identifier, 2);
@@ -46,16 +46,10 @@ public class EventSourcingRepositoryTest {
         assertEquals(2, aggregate.getHandledEvents().size());
         assertSame(event1, aggregate.getHandledEvents().get(0));
         assertSame(event2, aggregate.getHandledEvents().get(1));
-    }
 
-    @Test
-    public void testSaveAggregate() {
-        UUID identifier = UUID.randomUUID();
-        StubDomainEvent event1 = new StubDomainEvent(identifier, 1);
-        StubDomainEvent event2 = new StubDomainEvent(identifier, 2);
+        // now the aggregate is loaded (and hopefully correctly locked)
         StubDomainEvent event3 = new StubDomainEvent(identifier);
-        TestAggregate aggregate = new TestAggregate(identifier);
-        aggregate.initializeState(new SimpleEventStream(event1, event2));
+
         aggregate.apply(event3);
 
         testSubject.save(aggregate);
