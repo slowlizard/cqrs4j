@@ -130,7 +130,7 @@ public abstract class EventSourcingRepository<T extends EventSourcedAggregateRoo
 
     /**
      * Sets the event bus to which newly stored events should be published. Optional. By default, the repository tries
-     * to autwowire the event bus.
+     * to autowire the event bus.
      *
      * @param eventBus the event bus to publish events to
      */
