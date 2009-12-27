@@ -30,7 +30,7 @@ import java.util.UUID;
  * @see nl.gridshore.cqrs4j.DomainEvent
  * @see nl.gridshore.cqrs4j.AbstractAggregateRoot
  */
-public class EventContainer {
+class EventContainer {
 
     private final List<DomainEvent> events = new LinkedList<DomainEvent>();
     private final UUID aggregateIdentifier;
@@ -105,6 +105,15 @@ public class EventContainer {
     public void setFirstSequenceNumber(long firstSequenceNumber) {
         Assert.state(events.size() == 0, "Cannot set first sequence number if events have already been added");
         this.firstSequenceNumber = firstSequenceNumber;
+    }
+
+    /**
+     * Returns the sequence number of the event last added to this container
+     *
+     * @return the sequence number of the last event
+     */
+    public Long getLastSequenceNumber() {
+        return lastSequenceNumber;
     }
 
     /**

@@ -39,20 +39,61 @@ import java.util.UUID;
  */
 public abstract class EventSourcingRepository<T extends EventSourcedAggregateRoot> implements Repository<T> {
 
-    protected EventStore eventStore;
-    protected EventBus eventBus;
+    private EventStore eventStore;
+    private EventBus eventBus;
+    private final LockManager lockManager;
+
+    /**
+     * Initializes a repository with an optimistic locking strategy.
+     */
+    protected EventSourcingRepository() {
+        this(LockingStrategy.OPTIMISTIC);
+    }
+
+    /**
+     * Initialize a repository with the given locking strategy.
+     *
+     * @param lockingStrategy the locking strategy to apply to this
+     */
+    protected EventSourcingRepository(final LockingStrategy lockingStrategy) {
+        switch (lockingStrategy) {
+            case PESSIMISTIC:
+                lockManager = new PessimisticLockManager();
+                break;
+            case OPTIMISTIC:
+                lockManager = new OptimisticLockManager();
+                break;
+            default:
+                throw new IllegalArgumentException(String.format(
+                        "This repository implementation does not support the [%s] locking strategy",
+                        lockingStrategy.name()));
+        }
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void save(T aggregate) {
+        // make sure no events were previously committed
+        boolean isNewAggregate = (aggregate.getLastCommittedEventSequenceNumber() == null);
+        if (!isNewAggregate && !lockManager.validateLock(aggregate)) {
+            throw new ConcurrencyException(String.format(
+                    "The aggregate if type [%s] with identifier [%s] could not be "
+                            + "saved due to concurrent access to the repository",
+                    getTypeIdentifier(),
+                    aggregate.getIdentifier()));
+        }
+        // save events
         eventStore.appendEvents(getTypeIdentifier(), aggregate.getUncommittedEvents());
         EventStream uncommittedEvents = aggregate.getUncommittedEvents();
         while (uncommittedEvents.hasNext()) {
             eventBus.publish(uncommittedEvents.next());
         }
         aggregate.commitEvents();
+        if (!isNewAggregate) {
+            lockManager.releaseLock(aggregate.getIdentifier());
+        }
     }
 
     /**
@@ -61,6 +102,7 @@ public abstract class EventSourcingRepository<T extends EventSourcedAggregateRoo
     @SuppressWarnings({"unchecked"})
     @Override
     public T load(UUID aggregateIdentifier) {
+        lockManager.obtainLock(aggregateIdentifier);
         EventStream events = eventStore.readEvents(getTypeIdentifier(), aggregateIdentifier);
         T aggregate = instantiateAggregate(events.getAggregateIdentifier());
         aggregate.initializeState(events);
