@@ -124,7 +124,7 @@ public class BufferingAnnotationEventListenerAdapter extends AnnotationEventList
      * @return true if there are events in the queue
      */
     protected boolean hasEventsInQueue() {
-        return queue.isEmpty();
+        return !queue.isEmpty();
     }
 
     /**
@@ -134,7 +134,7 @@ public class BufferingAnnotationEventListenerAdapter extends AnnotationEventList
      * @param unit    the unit of the <code>timeout</code>
      * @return the next event from the queue or <code>null</code> if a timeout occurred.
      *
-     * @throws InterruptedException if the thread was interupted while waiting for incoming events
+     * @throws InterruptedException if the thread was interrupted while waiting for incoming events
      */
     protected DomainEvent getNextEventFromQueue(final int timeout, final TimeUnit unit) throws InterruptedException {
         return queue.poll(timeout, unit);
