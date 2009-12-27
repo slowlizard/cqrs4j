@@ -18,4 +18,12 @@ public interface EventSourcedAggregateRoot extends AggregateRoot {
      * @throws IllegalStateException if this aggregate was already initialized.
      */
     void initializeState(EventStream eventStream);
+
+    /**
+     * Returns the sequence number of the last committed event on this aggregate or <code>null</code> if events were
+     * ever committed. This sequence number can be used to implement optimistic locking strategies.
+     *
+     * @return the sequence number of the last committed event or <code>null</code> if no events were ever committed
+     */
+    Long getLastCommittedEventSequenceNumber();
 }

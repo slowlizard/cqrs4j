@@ -32,11 +32,13 @@ public class AbstractAggregateRootTest {
     @Test
     public void testInitializeWithEvents() {
         UUID identifier = UUID.randomUUID();
-        testSubject = new SimpleAggregateRoot(new SimpleEventStream(new StubDomainEvent(identifier, 0)));
+        testSubject = new SimpleAggregateRoot(identifier);
+        testSubject.initializeState(new SimpleEventStream(new StubDomainEvent(identifier, 243)));
 
         assertEquals(identifier, testSubject.getIdentifier());
         assertEquals(0, testSubject.getUncommittedEventCount());
         assertEquals(1, testSubject.invocationCount);
+        assertEquals(new Long(243), testSubject.getLastCommittedEventSequenceNumber());
     }
 
     @Test
@@ -45,14 +47,16 @@ public class AbstractAggregateRootTest {
 
         assertNotNull(testSubject.getIdentifier());
         assertEquals(0, testSubject.getUncommittedEventCount());
+        assertEquals(null, testSubject.getLastCommittedEventSequenceNumber());
 
         testSubject.apply(new StubDomainEvent());
 
         assertEquals(1, testSubject.invocationCount);
         assertEquals(1, testSubject.getUncommittedEventCount());
+        assertEquals(null, testSubject.getLastCommittedEventSequenceNumber());
 
         testSubject.commitEvents();
-
+        assertEquals(new Long(0), testSubject.getLastCommittedEventSequenceNumber());
         assertFalse(testSubject.getUncommittedEvents().hasNext());
     }
 
@@ -65,9 +69,8 @@ public class AbstractAggregateRootTest {
             super();
         }
 
-        private SimpleAggregateRoot(EventStream eventStream) {
-            super(eventStream.getAggregateIdentifier());
-            initializeState(eventStream);
+        private SimpleAggregateRoot(UUID identifier) {
+            super(identifier);
         }
 
         @Override

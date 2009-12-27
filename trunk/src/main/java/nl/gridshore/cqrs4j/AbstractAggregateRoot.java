@@ -31,6 +31,7 @@ public abstract class AbstractAggregateRoot implements EventSourcedAggregateRoot
 
     private final EventContainer uncommittedEvents;
     private final UUID identifier;
+    private volatile Long lastCommitted;
 
     /**
      * Initializes the aggregate root using a random aggregate identifier.
@@ -62,6 +63,15 @@ public abstract class AbstractAggregateRoot implements EventSourcedAggregateRoot
             handle(event);
         }
         uncommittedEvents.setFirstSequenceNumber(lastSequenceNumber + 1);
+        lastCommitted = lastSequenceNumber >= 0 ? lastSequenceNumber : null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long getLastCommittedEventSequenceNumber() {
+        return lastCommitted;
     }
 
     /**
@@ -105,6 +115,7 @@ public abstract class AbstractAggregateRoot implements EventSourcedAggregateRoot
      */
     @Override
     public void commitEvents() {
+        lastCommitted = uncommittedEvents.getLastSequenceNumber();
         uncommittedEvents.clear();
     }
 
