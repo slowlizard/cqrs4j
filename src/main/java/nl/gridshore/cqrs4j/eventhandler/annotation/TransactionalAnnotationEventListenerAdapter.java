@@ -109,19 +109,7 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
                         transactionCommitThreshold = Math.min(transactionCommitThreshold,
                                                               configuration.commitThreshold());
                     } else {
-                        try {
-                            processEventBatch(eventBatch);
-                        }
-                        catch (RuntimeException e) {
-                            if (isTransientException(e)) {
-                                logger.warn("An exception occurred in a transaction.", e);
-                                if (retryDelayMillis >= 0) {
-                                    retryBatch(eventBatch);
-                                }
-                            } else {
-                                throw e;
-                            }
-                        }
+                        tryPorcessEventBatch(eventBatch);
                         eventBatch.clear();
                         eventBatch.add(event);
                         transactionCommitThreshold = configuration.commitThreshold();
@@ -129,7 +117,23 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
                 }
             }
             // now, we have some events
-            processEventBatch(eventBatch);
+            tryPorcessEventBatch(eventBatch);
+        }
+
+        private void tryPorcessEventBatch(List<DomainEvent> eventBatch) {
+            try {
+                processEventBatch(eventBatch);
+            }
+            catch (RuntimeException e) {
+                if (isTransientException(e)) {
+                    logger.warn("An exception occurred in a transaction.", e);
+                    if (retryDelayMillis >= 0) {
+                        retryBatch(eventBatch);
+                    }
+                } else {
+                    throw e;
+                }
+            }
         }
 
         private boolean eventFitsInBatch(int currentTransactionCommitThreshold,
