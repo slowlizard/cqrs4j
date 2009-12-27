@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2009. Gridshore
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package nl.gridshore.cqrs4j.repository.eventsourcing;
 
 import nl.gridshore.cqrs4j.AbstractAggregateRoot;
@@ -37,7 +53,7 @@ public class EventSourcingRepositoryIntegrationTest implements Thread.UncaughtEx
         initializeRepository(LockingStrategy.PESSIMISTIC);
         long lastSequenceNumber = executeConcurrentModifications(10);
 
-        // with pessimistic locking, all modifications are guaranteed succesful
+        // with pessimistic locking, all modifications are guaranteed successful
         // note: sequence number 20 means there are 21 events. This includes the one from the setup
         assertEquals(20, lastSequenceNumber);
         assertEquals(10, getSuccessfulModifications());
@@ -86,7 +102,7 @@ public class EventSourcingRepositoryIntegrationTest implements Thread.UncaughtEx
         for (Throwable e : uncaughtExceptions) {
             if (!(e instanceof ConcurrencyException)) {
                 e.printStackTrace();
-                fail("A non-concurrency related exception was found. See stacktrace above");
+                fail("A non-concurrency related exception was found. See stack trace above");
             }
         }
 
