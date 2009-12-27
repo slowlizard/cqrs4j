@@ -20,14 +20,19 @@ import nl.gridshore.cqrs4j.DomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.sql.BatchUpdateException;
+import java.sql.SQLRecoverableException;
 import java.sql.SQLTransientException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -46,6 +51,14 @@ import java.util.concurrent.TimeUnit;
 public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnotationEventListenerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionalAnnotationEventListenerAdapter.class);
+    private static final List<Class<? extends Exception>> transientExceptions =
+            Arrays.asList(
+                    RecoverableDataAccessException.class,
+                    TransientDataAccessException.class,
+                    SQLTransientException.class,
+                    TransactionException.class,
+                    BatchUpdateException.class,
+                    SQLRecoverableException.class);
 
     private PlatformTransactionManager transactionManager;
     private long retryDelayMillis = 1000;
@@ -57,6 +70,7 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
      */
     public TransactionalAnnotationEventListenerAdapter(Object annotatedEventListener) {
         super(annotatedEventListener);
+
     }
 
     /**
@@ -109,7 +123,7 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
                         transactionCommitThreshold = Math.min(transactionCommitThreshold,
                                                               configuration.commitThreshold());
                     } else {
-                        tryPorcessEventBatch(eventBatch);
+                        tryProcessEventBatch(eventBatch);
                         eventBatch.clear();
                         eventBatch.add(event);
                         transactionCommitThreshold = configuration.commitThreshold();
@@ -117,10 +131,10 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
                 }
             }
             // now, we have some events
-            tryPorcessEventBatch(eventBatch);
+            tryProcessEventBatch(eventBatch);
         }
 
-        private void tryPorcessEventBatch(List<DomainEvent> eventBatch) {
+        private void tryProcessEventBatch(List<DomainEvent> eventBatch) {
             try {
                 processEventBatch(eventBatch);
             }
@@ -144,12 +158,22 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
             return transactionCommitThreshold >= eventBatch.size() + 1;
         }
 
+        @SuppressWarnings({"SimplifiableIfStatement"})
         private boolean isTransientException(Throwable e) {
-            if (e instanceof TransientDataAccessException || e instanceof SQLTransientException) {
+            if (isAssignableToAnyOf(e, transientExceptions)) {
                 return true;
             }
             if (e.getCause() != null) {
                 return isTransientException(e.getCause());
+            }
+            return false;
+        }
+
+        private boolean isAssignableToAnyOf(Throwable exception, List<Class<? extends Exception>> transientExceptions) {
+            for (Class exceptionClass : transientExceptions) {
+                if (exceptionClass.isInstance(exception)) {
+                    return true;
+                }
             }
             return false;
         }
@@ -201,18 +225,17 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
     }
 
     /**
-     * Sets the delay in milliseconds that the adapter should wait before reattempting any failed transactions. Provide
-     * a negative value to disable retrying. In that case, all events handled in the failed transaction are ignored.
+     * Set the amount of milliseconds the poller should wait before retrying a transaction when one has failed. If the
+     * value if negative, retrying is disabled on any transactional event handlers.
      * <p/>
-     * Transactions are only subject to retrying if they failed with a {@link org.springframework.dao.TransientDataAccessException}
-     * or a {@link java.sql.SQLTransientException} Any other exception will cause an entire batch to be ignored.
-     * <p/>
-     * It is not recommended changing this value once the poller thread is running. The poller may cache this value for
-     * performance reasons and could ignore any changed values.
+     * Transactions that failed due to one of the following exceptions are retried: <ul> <li>{@link
+     * org.springframework.dao.RecoverableDataAccessException} <li>{@link org.springframework.dao.TransientDataAccessException}
+     * <li>{@link java.sql.SQLTransientException} <li>{@link org.springframework.transaction.TransactionException}
+     * <li>{@link java.sql.BatchUpdateException} <li>{@link java.sql.SQLRecoverableException} </ul>
      * <p/>
      * Defaults to 1000 (1 second)
      *
-     * @param retryDelayMillis the number of milliseconds to wait before retrying a transaction
+     * @param retryDelayMillis the amount of milliseconds to wait beforer retrying a transaction
      */
     public void setRetryDelayMillis(long retryDelayMillis) {
         this.retryDelayMillis = retryDelayMillis;
