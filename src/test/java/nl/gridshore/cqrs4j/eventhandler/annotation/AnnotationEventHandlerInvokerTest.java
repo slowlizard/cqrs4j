@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * @author Allard Buijze
  */
 @SuppressWarnings({"UnusedDeclaration"})
-public class AnnotationEventHandlerSupportTest {
+public class AnnotationEventHandlerInvokerTest {
 
     private AnnotationEventHandlerInvoker testSubject;
 
@@ -88,6 +88,24 @@ public class AnnotationEventHandlerSupportTest {
         catch (UnsupportedHandlerMethodException e) {
             assertTrue(e.getMessage().contains("notARealHandler"));
             assertEquals("notARealHandler", e.getViolatingMethod().getName());
+        }
+    }
+
+    /*
+    Test scenario:
+    a method called handle with single parameter of type DomainEvent is not allowed. It conflicts with the proxy.
+     */
+
+    @Test
+    public void testValidateEventHandler_HandleDomainEventIsRejected() {
+        FirstSubclass handler = new EventHandlerWithUnfortunateMethod();
+        try {
+            AnnotationEventHandlerInvoker.validateHandlerMethods(handler);
+            fail("Expected an UnsupportedHandlerMethodException");
+        }
+        catch (UnsupportedHandlerMethodException e) {
+            assertTrue(e.getMessage().contains("conflict"));
+            assertEquals("handle", e.getViolatingMethod().getName());
         }
     }
 
@@ -173,4 +191,10 @@ public class AnnotationEventHandlerSupportTest {
 
     }
 
+    private class EventHandlerWithUnfortunateMethod extends FirstSubclass {
+
+        @EventHandler
+        public void handle(DomainEvent event) {
+        }
+    }
 }

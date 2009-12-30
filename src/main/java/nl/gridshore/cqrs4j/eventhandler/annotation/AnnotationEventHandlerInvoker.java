@@ -17,10 +17,12 @@
 package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
+import nl.gridshore.cqrs4j.eventhandler.EventListener;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -89,6 +91,18 @@ class AnnotationEventHandlerInvoker {
                                 method.getName()),
                                                                     method);
                     }
+                    Method[] forbiddenMethods = EventListener.class.getDeclaredMethods();
+                    for (Method forbiddenMethod : forbiddenMethods) {
+                        if (method.getName().equals(forbiddenMethod.getName())
+                                && Arrays.equals(method.getParameterTypes(), forbiddenMethod.getParameterTypes())) {
+                            throw new UnsupportedHandlerMethodException(String.format(
+                                    "Event Handling class %s contains method %s that has a naming conflict with a method on"
+                                            + "the EventHandler interface. Please rename the method.",
+                                    method.getDeclaringClass().getSimpleName(),
+                                    method.getName()),
+                                                                        method);
+                        }
+                    }
                 }
             }
         });
@@ -117,7 +131,7 @@ class AnnotationEventHandlerInvoker {
         } catch (InvocationTargetException e) {
             throw new UnsupportedOperationException(String.format(
                     "An error occurred when applying an event of type [%s]",
-                    event.getClass().getSimpleName()), e);
+                    event.getClass().getSimpleName()), e.getCause() != null ? e.getCause() : e);
         }
     }
 
@@ -175,6 +189,5 @@ class AnnotationEventHandlerInvoker {
         });
         eventHandlers.put(eventClass, bestMethodSoFar.get());
     }
-
 
 }
