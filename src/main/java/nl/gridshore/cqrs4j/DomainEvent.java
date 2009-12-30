@@ -114,12 +114,17 @@ public abstract class DomainEvent {
         if (!createDate.equals(that.createDate)) {
             return false;
         }
+
         if (aggregateIdentifier != null ? !aggregateIdentifier.equals(that.aggregateIdentifier) :
-                that.aggregateIdentifier
-                        != null) {
+                that.aggregateIdentifier != null) {
             return false;
         }
-        if (sequenceNumber != null ? !sequenceNumber.equals(that.sequenceNumber) : that.sequenceNumber != null) {
+
+        if (this.sequenceNumber == null || that.sequenceNumber == null) {
+            return false;
+        }
+
+        if (!sequenceNumber.equals(that.sequenceNumber)) {
             return false;
         }
 
