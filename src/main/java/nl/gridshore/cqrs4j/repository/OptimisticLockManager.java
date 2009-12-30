@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package nl.gridshore.cqrs4j.repository.eventsourcing;
+package nl.gridshore.cqrs4j.repository;
 
-import nl.gridshore.cqrs4j.EventSourcedAggregateRoot;
+import nl.gridshore.cqrs4j.VersionedAggregateRoot;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,18 +26,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * the last committed event to detect concurrent access.
  * <p/>
  * Classes that use a repository with this strategy must implement any retry logic themselves. Use the {@link
- * nl.gridshore.cqrs4j.repository.eventsourcing.ConcurrencyException} to detect concurrent access.
+ * ConcurrencyException} to detect concurrent access.
  *
  * @author Allard Buijze
  * @see nl.gridshore.cqrs4j.EventSourcedAggregateRoot
- * @see nl.gridshore.cqrs4j.repository.eventsourcing.ConcurrencyException
+ * @see ConcurrencyException
  */
 class OptimisticLockManager implements LockManager {
 
     private ConcurrentHashMap<UUID, Long> versionMap = new ConcurrentHashMap<UUID, Long>();
 
     @Override
-    public boolean validateLock(EventSourcedAggregateRoot aggregate) {
+    public boolean validateLock(VersionedAggregateRoot aggregate) {
         long newVersion = aggregate.getLastCommittedEventSequenceNumber()
                 + aggregate.getUncommittedEventCount();
         return versionMap.replace(aggregate.getIdentifier(),

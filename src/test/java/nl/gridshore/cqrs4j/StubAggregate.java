@@ -14,21 +14,34 @@
  * limitations under the License.
  */
 
-package nl.gridshore.cqrs4j.repository.eventsourcing;
+package nl.gridshore.cqrs4j;
+
+import java.util.UUID;
 
 /**
- * Exception indicating that concurrent access to a repository was detected. Most likely, two threads were modifying the
- * same aggregate.
- *
  * @author Allard Buijze
  */
-public class ConcurrencyException extends RuntimeException {
+public class StubAggregate extends AbstractAggregateRoot {
 
-    public ConcurrencyException(String message) {
-        super(message);
+    private int invocationCount;
+
+    public StubAggregate() {
     }
 
-    public ConcurrencyException(String message, Throwable cause) {
-        super(message, cause);
+    public StubAggregate(UUID identifier) {
+        super(identifier);
+    }
+
+    public void doSomething() {
+        apply(new StubDomainEvent());
+    }
+
+    @Override
+    protected void handle(DomainEvent event) {
+        invocationCount++;
+    }
+
+    public int getInvocationCount() {
+        return invocationCount;
     }
 }

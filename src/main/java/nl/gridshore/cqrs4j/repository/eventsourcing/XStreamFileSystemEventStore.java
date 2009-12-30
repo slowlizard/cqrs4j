@@ -21,7 +21,6 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
 import com.thoughtworks.xstream.io.xml.CompactWriter;
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.EventStream;
-import nl.gridshore.cqrs4j.repository.ObjectInputStreamAdapter;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Required;
@@ -116,7 +115,11 @@ public class XStreamFileSystemEventStore implements EventStore {
             ObjectInputStream eventsStream = xStream.createObjectInputStream(inputStream);
             return new ObjectInputStreamAdapter(eventsStream);
         } catch (IOException e) {
-            throw new IllegalStateException("No such file", e);
+            throw new IllegalStateException(
+                    String.format("An error occurred while trying to open the event file "
+                            + "for aggregate type [%s] with identifier [%s]",
+                                  type,
+                                  identifier.toString()), e);
         }
     }
 
