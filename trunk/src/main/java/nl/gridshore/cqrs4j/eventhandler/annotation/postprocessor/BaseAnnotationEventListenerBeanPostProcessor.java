@@ -25,27 +25,25 @@ import nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Allard Buijze
  */
 public abstract class BaseAnnotationEventListenerBeanPostProcessor
-        implements BeanPostProcessor, ApplicationContextAware, DisposableBean {
+        implements DestructionAwareBeanPostProcessor, ApplicationContextAware {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseAnnotationEventListenerBeanPostProcessor.class);
 
-    private final List<DisposableBean> beansToDisposeOfAtShutdown = new LinkedList<DisposableBean>();
+    private final Map<String, AnnotationEventListenerAdapter> managedAdapters = new HashMap<String, AnnotationEventListenerAdapter>();
     private ApplicationContext applicationContext;
     private EventBus eventBus;
 
@@ -63,15 +61,25 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
     @Override
     public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
         Class<?> targetClass = bean.getClass();
-        if (targetClass == null) {
-            return bean;
-        }
         if (isNotEventHandlerSubclass(targetClass) && hasEventHandlerMethod(targetClass)) {
             AnnotationEventListenerAdapter adapter = initializeAdapterFor(bean);
-            beansToDisposeOfAtShutdown.add(adapter);
+            managedAdapters.put(beanName, adapter);
             return createAdapterProxy(targetClass, bean, adapter);
         }
         return bean;
+    }
+
+    @Override
+    public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
+        if (managedAdapters.containsKey(beanName)) {
+            try {
+                managedAdapters.get(beanName).destroy();
+            } catch (Exception e) {
+                logger.error("An exception occurred while shutting down an AnnotationAdapter.", e);
+            } finally {
+                managedAdapters.remove(beanName);
+            }
+        }
     }
 
     /**
@@ -105,8 +113,7 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
     protected abstract AnnotationEventListenerAdapter adapt(Object bean);
 
     private Object createAdapterProxy(Class targetClass, Object eventHandler, AnnotationEventListenerAdapter adapter) {
-        Class[] adapterInterfaces = ClassUtils.getAllInterfaces(adapter);
-
+        Class[] adapterInterfaces = new Class[]{EventListener.class};
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(targetClass);
         enhancer.setClassLoader(targetClass.getClassLoader());
@@ -130,16 +137,6 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
             }
         });
         return result.get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void destroy() throws Exception {
-        for (DisposableBean bean : beansToDisposeOfAtShutdown) {
-            bean.destroy();
-        }
     }
 
     public void setEventBus(EventBus eventBus) {

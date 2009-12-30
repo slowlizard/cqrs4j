@@ -46,21 +46,6 @@ public class AnnotationEventHandlerBeanPostProcessorTest {
     }
 
     @Test
-    public void testPostProcessBean_ProxyLifeCycle() throws Exception {
-        Object actualResult = testSubject.postProcessAfterInitialization(new SimpleEventHandler(), "beanName");
-
-        assertTrue(Enhancer.isEnhanced(actualResult.getClass()));
-        assertTrue(actualResult instanceof SimpleEventHandler);
-        assertTrue(actualResult instanceof EventListener);
-
-        verify(mockEventBus, times(1)).subscribe(isA(EventListener.class));
-
-        testSubject.destroy();
-
-        verify(mockEventBus, times(1)).unsubscribe(isA(EventListener.class));
-    }
-
-    @Test
     public void testPostProcessBean_AlreadyHandlerIsNotEnhanced() {
         RealEventListener eventHandler = new RealEventListener();
         Object actualResult = testSubject.postProcessAfterInitialization(eventHandler, "beanName");
@@ -75,7 +60,6 @@ public class AnnotationEventHandlerBeanPostProcessorTest {
         assertFalse(Enhancer.isEnhanced(actualResult.getClass()));
         assertSame(eventHandler, actualResult);
     }
-
 
     public static class NotAnEventHandler {
 
