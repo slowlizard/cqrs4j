@@ -16,16 +16,21 @@
 
 package nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor;
 
-import net.sf.cglib.core.NamingPolicy;
-import net.sf.cglib.core.Predicate;
+import net.sf.cglib.core.DefaultNamingPolicy;
 
 /**
+ * CGLib naming policy for classes that tags generated classed with "cqrs4j". This helps identify which classes were
+ * generated for cqrs4j, and which cglib classes were generated for other purposes.
+ *
  * @author Allard Buijze
  */
-class Cqrs4jNamingPolicy implements NamingPolicy {
+class Cqrs4jNamingPolicy extends DefaultNamingPolicy {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String getClassName(String prefix, String source, Object key, Predicate names) {
-        return prefix + "$$cqrs4jAdapter$$";
+    protected String getTag() {
+        return "cqrs4j";
     }
 }
