@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package nl.gridshore.cqrs4j.repository.eventsourcing;
+package nl.gridshore.cqrs4j.repository;
 
-import nl.gridshore.cqrs4j.EventSourcedAggregateRoot;
+import nl.gridshore.cqrs4j.VersionedAggregateRoot;
 import org.springframework.util.Assert;
 
 import java.util.UUID;
@@ -24,9 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Implementation of the {@link nl.gridshore.cqrs4j.repository.eventsourcing.LockManager} that uses a pessimistic
- * locking strategy. Calls to obtainLock will block until a lock could be obtained. If a lock is obtained by a thread,
- * that thread has guaranteed unique access.
+ * Implementation of the {@link LockManager} that uses a pessimistic locking strategy. Calls to obtainLock will block
+ * until a lock could be obtained. If a lock is obtained by a thread, that thread has guaranteed unique access.
  *
  * @author Allard Buijze
  */
@@ -38,9 +37,19 @@ class PessimisticLockManager implements LockManager {
      * {@inheritDoc}
      */
     @Override
-    public boolean validateLock(EventSourcedAggregateRoot aggregate) {
-        return locks.containsKey(aggregate.getIdentifier())
-                && locks.get(aggregate.getIdentifier()).isHeldByCurrentThread();
+    public boolean validateLock(VersionedAggregateRoot aggregate) {
+        UUID aggregateIdentifier = aggregate.getIdentifier();
+        boolean currentThreadHoldsLock = isLockAvailableFor(aggregateIdentifier)
+                && lockFor(aggregateIdentifier).isHeldByCurrentThread();
+        boolean lockIsAvailable = !isLockAvailableFor(aggregateIdentifier) || !lockFor(aggregateIdentifier).isLocked();
+
+        if (!currentThreadHoldsLock && lockIsAvailable) {
+            // if the thread lost the lock due to an exception, it could get it back, if it's lucky.
+            createLockIfAbsent(aggregateIdentifier);
+            return lockFor(aggregateIdentifier).tryLock();
+        } else {
+            return currentThreadHoldsLock;
+        }
     }
 
     /**
@@ -50,8 +59,8 @@ class PessimisticLockManager implements LockManager {
      */
     @Override
     public void obtainLock(UUID aggregateIdentifier) {
-        locks.putIfAbsent(aggregateIdentifier, new ReentrantLock());
-        locks.get(aggregateIdentifier).lock();
+        createLockIfAbsent(aggregateIdentifier);
+        lockFor(aggregateIdentifier).lock();
     }
 
     /**
@@ -64,6 +73,18 @@ class PessimisticLockManager implements LockManager {
     @Override
     public void releaseLock(UUID aggregateIdentifier) {
         Assert.state(locks.containsKey(aggregateIdentifier), "No lock for this aggregate was ever obtained");
-        locks.get(aggregateIdentifier).unlock();
+        lockFor(aggregateIdentifier).unlock();
+    }
+
+    private void createLockIfAbsent(UUID aggregateIdentifier) {
+        locks.putIfAbsent(aggregateIdentifier, new ReentrantLock());
+    }
+
+    private boolean isLockAvailableFor(UUID aggregateIdentifier) {
+        return locks.containsKey(aggregateIdentifier);
+    }
+
+    private ReentrantLock lockFor(UUID aggregateIdentifier) {
+        return locks.get(aggregateIdentifier);
     }
 }

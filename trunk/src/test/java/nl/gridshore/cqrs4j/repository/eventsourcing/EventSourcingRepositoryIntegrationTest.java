@@ -21,6 +21,8 @@ import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.EventStream;
 import nl.gridshore.cqrs4j.StubDomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
+import nl.gridshore.cqrs4j.repository.ConcurrencyException;
+import nl.gridshore.cqrs4j.repository.LockingStrategy;
 import org.junit.*;
 import org.junit.rules.*;
 import org.springframework.core.io.FileSystemResource;

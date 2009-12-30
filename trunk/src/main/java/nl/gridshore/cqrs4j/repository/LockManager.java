@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package nl.gridshore.cqrs4j.repository.eventsourcing;
+package nl.gridshore.cqrs4j.repository;
 
-import nl.gridshore.cqrs4j.EventSourcedAggregateRoot;
+import nl.gridshore.cqrs4j.VersionedAggregateRoot;
 
 import java.util.UUID;
 
@@ -33,7 +33,7 @@ interface LockManager {
      * @param aggregate the aggregate to validate the lock for
      * @return true if a valid lock is held, false otherwise
      */
-    boolean validateLock(EventSourcedAggregateRoot aggregate);
+    boolean validateLock(VersionedAggregateRoot aggregate);
 
     /**
      * Obtain a lock for an aggregate with the given <code>aggregateIdentifier</code>. Depending on the strategy, this

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nl.gridshore.cqrs4j.repository;
+package nl.gridshore.cqrs4j.repository.eventsourcing;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.EventStream;
