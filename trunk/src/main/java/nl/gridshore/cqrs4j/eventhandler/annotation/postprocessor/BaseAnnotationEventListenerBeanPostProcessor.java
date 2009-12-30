@@ -119,6 +119,7 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
         enhancer.setClassLoader(targetClass.getClassLoader());
         enhancer.setInterfaces(adapterInterfaces);
         enhancer.setCallback(new AdapterInvocationHandler(adapterInterfaces, adapter, eventHandler));
+        enhancer.setNamingPolicy(new Cqrs4jNamingPolicy());
         return enhancer.create();
     }
 
@@ -185,4 +186,5 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
             return false;
         }
     }
+
 }

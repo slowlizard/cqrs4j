@@ -41,8 +41,7 @@ public class TransactionalAnnotationEventListenerAdapterTest {
     private AnnotatedEventHandler eventHandler = new AnnotatedEventHandler();
 
     @Test
-//(timeout = 5000)
-public void testTransactionIsRetried() throws Exception {
+    public void testTransactionIsRetried() throws Exception {
         TransactionalAnnotationEventListenerAdapter adapter = new TransactionalAnnotationEventListenerAdapter(
                 eventHandler);
         MockPlatformTransactionManager transactionManager = new MockPlatformTransactionManager();

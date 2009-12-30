@@ -17,9 +17,11 @@
 package nl.gridshore.cqrs4j.eventhandler;
 
 import nl.gridshore.cqrs4j.DomainEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Implementation of the {@link nl.gridshore.cqrs4j.eventhandler.EventBus} that directly forwards all published events
@@ -29,14 +31,20 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class SimpleEventBus implements EventBus {
 
-    private final List<EventListener> listeners = new CopyOnWriteArrayList<EventListener>();
+    private final Set<EventListener> listeners = new CopyOnWriteArraySet<EventListener>();
+    private static final Logger logger = LoggerFactory.getLogger(SimpleEventBus.class);
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void unsubscribe(EventListener eventListener) {
-        listeners.remove(eventListener);
+        if (listeners.remove(eventListener)) {
+            logger.debug("EventListener {} unsubscribed successfully", eventListener.getClass().getSimpleName());
+        } else {
+            logger.info("EventListener {} not removed. It was already unsubscribed",
+                        eventListener.getClass().getSimpleName());
+        }
     }
 
     /**
@@ -44,7 +52,12 @@ public class SimpleEventBus implements EventBus {
      */
     @Override
     public void subscribe(EventListener eventListener) {
-        listeners.add(eventListener);
+        if (listeners.add(eventListener)) {
+            logger.debug("EventListener [{}] subscribed successfully", eventListener.getClass().getSimpleName());
+        } else {
+            logger.info("EventListener [{}] not added. It was already subscribed",
+                        eventListener.getClass().getSimpleName());
+        }
     }
 
     /**
@@ -54,7 +67,14 @@ public class SimpleEventBus implements EventBus {
     public void publish(DomainEvent event) {
         for (EventListener listener : listeners) {
             if (listener.canHandle(event.getClass())) {
+                logger.debug("Dispatching Event [{}] to EventListener [{}]",
+                             event.getClass().getSimpleName(),
+                             listener.getClass().getSimpleName());
                 listener.handle(event);
+            } else {
+                logger.debug("Dispatching of Event [{}] skipped for EventListener [{}]",
+                             event.getClass().getSimpleName(),
+                             listener.getClass().getSimpleName());
             }
         }
     }
