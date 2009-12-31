@@ -25,6 +25,7 @@ import java.util.UUID;
  * streams}.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public interface EventStore {
 
@@ -35,7 +36,7 @@ public interface EventStore {
      * @param events The event stream containing the events to store
      * @throws EventStorageException if an error occurs while storing the events in the event stream
      */
-    public void appendEvents(String type, EventStream events);
+    void appendEvents(String type, EventStream events);
 
     /**
      * Read the events of the aggregate identified by the given type and identifier.
@@ -44,5 +45,5 @@ public interface EventStore {
      * @param identifier The unique aggregate identifier of the events to load
      * @return an event stream containing the events of the aggregate
      */
-    public EventStream readEvents(String type, UUID identifier);
+    EventStream readEvents(String type, UUID identifier);
 }

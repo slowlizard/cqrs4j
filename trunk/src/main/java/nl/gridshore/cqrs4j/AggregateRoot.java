@@ -23,6 +23,7 @@ import java.util.UUID;
  *
  * @author Allard Buijze
  * @see nl.gridshore.cqrs4j.AbstractAggregateRoot
+ * @since 0.1
  */
 public interface AggregateRoot {
 

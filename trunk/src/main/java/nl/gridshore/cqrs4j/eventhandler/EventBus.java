@@ -28,6 +28,7 @@ import nl.gridshore.cqrs4j.DomainEvent;
  * @see nl.gridshore.cqrs4j.eventhandler.EventListener
  * @see nl.gridshore.cqrs4j.eventhandler.SimpleEventBus
  * @see nl.gridshore.cqrs4j.eventhandler.SpringIntegrationEventBus
+ * @since 0.1
  */
 public interface EventBus {
 

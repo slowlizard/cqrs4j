@@ -47,6 +47,7 @@ import java.util.concurrent.TimeUnit;
  * @see org.springframework.transaction.annotation.Transactional
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor.TransactionalAnnotationEventListenerBeanPostProcessor
+ * @since 0.1
  */
 public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnotationEventListenerAdapter {
 
@@ -81,7 +82,7 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
         return new TransactionalPoller(transactionManager);
     }
 
-    private class TransactionalPoller implements Runnable {
+    private final class TransactionalPoller implements Runnable {
 
         private final TransactionTemplate transactionTemplate;
 
@@ -89,6 +90,9 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
             transactionTemplate = new TransactionTemplate(transactionManager);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void run() {
             while (hasEventsInQueue() || isRunning()) {
@@ -160,7 +164,7 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
 
         @SuppressWarnings({"SimplifiableIfStatement"})
         private boolean isTransientException(Throwable e) {
-            if (isAssignableToAnyOf(e, transientExceptions)) {
+            if (isAssignableToTransientException(e)) {
                 return true;
             }
             if (e.getCause() != null) {
@@ -169,7 +173,7 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
             return false;
         }
 
-        private boolean isAssignableToAnyOf(Throwable exception, List<Class<? extends Exception>> transientExceptions) {
+        private boolean isAssignableToTransientException(Throwable exception) {
             for (Class exceptionClass : transientExceptions) {
                 if (exceptionClass.isInstance(exception)) {
                     return true;

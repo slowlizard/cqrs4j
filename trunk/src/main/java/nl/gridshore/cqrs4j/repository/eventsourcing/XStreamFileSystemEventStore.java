@@ -50,6 +50,7 @@ import java.util.UUID;
  * stored
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public class XStreamFileSystemEventStore implements EventStore {
 
@@ -61,23 +62,7 @@ public class XStreamFileSystemEventStore implements EventStore {
      */
     public XStreamFileSystemEventStore() {
         xStream = new XStream();
-        xStream.registerConverter(new SingleValueConverter() {
-            @Override
-            public boolean canConvert(Class type) {
-                return type.equals(LocalDateTime.class);
-            }
-
-            @Override
-            public String toString(Object obj) {
-                return obj.toString();
-            }
-
-            @Override
-            public Object fromString(String str) {
-                return new LocalDateTime(str);
-            }
-        });
-
+        xStream.registerConverter(new LocalDateTimeConverter());
     }
 
     /**
@@ -177,4 +162,30 @@ public class XStreamFileSystemEventStore implements EventStore {
         }
     }
 
+    private static class LocalDateTimeConverter implements SingleValueConverter {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean canConvert(Class type) {
+            return type.equals(LocalDateTime.class);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString(Object obj) {
+            return obj.toString();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Object fromString(String str) {
+            return new LocalDateTime(str);
+        }
+    }
 }

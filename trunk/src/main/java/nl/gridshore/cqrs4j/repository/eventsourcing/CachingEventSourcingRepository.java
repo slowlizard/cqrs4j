@@ -31,11 +31,13 @@ import java.util.UUID;
  * This is done to prevent the cache from returning aggregates that may not have fully persisted to disk.
  *
  * @author Allard Buijze
+ * @param <T> The type of aggregate this repository stores
+ * @since 0.3
  */
 public abstract class CachingEventSourcingRepository<T extends EventSourcedAggregateRoot>
         extends EventSourcingRepository<T> {
 
-    private Cache cache;
+    private Cache cache = new NoCache();
 
     /**
      * Initializes a repository with a pessimistic locking strategy. Optimistic locking is not compatible with caching.
@@ -85,7 +87,13 @@ public abstract class CachingEventSourcingRepository<T extends EventSourcedAggre
         return existingAggregate;
     }
 
+    /**
+     * Set the cache to use for this repository. If a cache is not set, caching is disabled for this implementation.
+     *
+     * @param cache the cache to use
+     */
     public void setCache(Cache cache) {
         this.cache = cache;
     }
+
 }

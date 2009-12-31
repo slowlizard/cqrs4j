@@ -17,7 +17,6 @@
 package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.AbstractAggregateRoot;
-import nl.gridshore.cqrs4j.AggregateRoot;
 import nl.gridshore.cqrs4j.DomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +34,9 @@ import java.util.UUID;
  *
  * @author Allard Buijze
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
+ * @since 0.1
  */
-public abstract class AbstractAnnotatedAggregateRoot extends AbstractAggregateRoot implements AggregateRoot {
+public abstract class AbstractAnnotatedAggregateRoot extends AbstractAggregateRoot {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractAnnotatedAggregateRoot.class);
     private final AnnotationEventHandlerInvoker eventHandlerInvoker;

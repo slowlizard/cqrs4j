@@ -27,6 +27,7 @@ import nl.gridshore.cqrs4j.DomainEvent;
  * annotate it with {@link nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler}.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public class UnhandledEventException extends RuntimeException {
 

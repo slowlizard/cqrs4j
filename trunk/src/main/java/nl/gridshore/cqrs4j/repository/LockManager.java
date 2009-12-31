@@ -24,6 +24,7 @@ import java.util.UUID;
  * Interface to the lock manager. A lock manager will maintain and validate locks on aggregates of a single type
  *
  * @author Allard Buijze
+ * @since 0.3
  */
 interface LockManager {
 

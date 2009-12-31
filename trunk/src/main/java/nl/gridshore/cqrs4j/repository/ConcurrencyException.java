@@ -21,9 +21,15 @@ package nl.gridshore.cqrs4j.repository;
  * same aggregate.
  *
  * @author Allard Buijze
+ * @since 0.3
  */
 public class ConcurrencyException extends RuntimeException {
 
+    /**
+     * Initialize a ConcurrencyException with the given <code>message</code>
+     *
+     * @param message The message describing the cause of the exception
+     */
     public ConcurrencyException(String message) {
         super(message);
     }

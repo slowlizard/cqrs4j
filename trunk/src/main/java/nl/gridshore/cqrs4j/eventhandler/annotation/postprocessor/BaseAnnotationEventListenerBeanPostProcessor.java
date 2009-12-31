@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Allard Buijze
+ * @since 0.3
  */
 public abstract class BaseAnnotationEventListenerBeanPostProcessor
         implements DestructionAwareBeanPostProcessor, ApplicationContextAware {
@@ -69,6 +70,9 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
         return bean;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
         if (managedAdapters.containsKey(beanName)) {
@@ -113,12 +117,11 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
     protected abstract AnnotationEventListenerAdapter adapt(Object bean);
 
     private Object createAdapterProxy(Class targetClass, Object eventHandler, AnnotationEventListenerAdapter adapter) {
-        Class[] adapterInterfaces = new Class[]{EventListener.class};
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(targetClass);
         enhancer.setClassLoader(targetClass.getClassLoader());
-        enhancer.setInterfaces(adapterInterfaces);
-        enhancer.setCallback(new AdapterInvocationHandler(adapterInterfaces, adapter, eventHandler));
+        enhancer.setInterfaces(new Class[]{EventListener.class});
+        enhancer.setCallback(new AdapterInvocationHandler(adapter, eventHandler));
         enhancer.setNamingPolicy(new Cqrs4jNamingPolicy());
         return enhancer.create();
     }
@@ -129,17 +132,17 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
 
     private boolean hasEventHandlerMethod(Class<?> beanClass) {
         final AtomicBoolean result = new AtomicBoolean(false);
-        ReflectionUtils.doWithMethods(beanClass, new ReflectionUtils.MethodCallback() {
-            @Override
-            public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-                if (method.isAnnotationPresent(EventHandler.class)) {
-                    result.set(true);
-                }
-            }
-        });
+        ReflectionUtils.doWithMethods(beanClass, new HasEventHandlerAnnotationMethodCallback(result));
         return result.get();
     }
 
+    /**
+     * Sets the event bus to which the event listeners should be registered to upon creation. If none is explicitly
+     * provided, the event bus will be injected from the application context. This will only work if a single {@link
+     * nl.gridshore.cqrs4j.eventhandler.EventBus} instance is registered in the application context.
+     *
+     * @param eventBus the event bus to register event listeners to
+     */
     public void setEventBus(EventBus eventBus) {
         this.eventBus = eventBus;
     }
@@ -152,17 +155,12 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
         this.applicationContext = applicationContext;
     }
 
-    private static class AdapterInvocationHandler implements InvocationHandler {
-
-        private final Class[] adapterInterfaces;
+    private static final class AdapterInvocationHandler implements InvocationHandler {
 
         private final AnnotationEventListenerAdapter adapter;
-
         private final Object bean;
 
-        public AdapterInvocationHandler(Class[] adapterInterfaces, AnnotationEventListenerAdapter adapter,
-                                        Object bean) {
-            this.adapterInterfaces = adapterInterfaces;
+        private AdapterInvocationHandler(AnnotationEventListenerAdapter adapter, Object bean) {
             this.adapter = adapter;
             this.bean = bean;
         }
@@ -171,20 +169,26 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
         public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
             // this is where we test the method
             Class declaringClass = method.getDeclaringClass();
-            if (arrayContainsEquals(adapterInterfaces, declaringClass)) {
+            if (declaringClass.equals(EventListener.class)) {
                 return method.invoke(adapter, arguments);
             }
             return method.invoke(bean, arguments);
         }
-
-        private <T> boolean arrayContainsEquals(T[] adapterInterfaces, T declaringClass) {
-            for (T item : adapterInterfaces) {
-                if (declaringClass.equals(item)) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 
+    private static class HasEventHandlerAnnotationMethodCallback implements ReflectionUtils.MethodCallback {
+
+        private final AtomicBoolean result;
+
+        public HasEventHandlerAnnotationMethodCallback(AtomicBoolean result) {
+            this.result = result;
+        }
+
+        @Override
+        public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+            if (method.isAnnotationPresent(EventHandler.class)) {
+                result.set(true);
+            }
+        }
+    }
 }

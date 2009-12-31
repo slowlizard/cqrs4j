@@ -22,6 +22,7 @@ package nl.gridshore.cqrs4j;
  *
  * @author Allard Buijze
  * @see nl.gridshore.cqrs4j.repository.eventsourcing.EventSourcingRepository
+ * @since 0.3
  */
 public interface EventSourcedAggregateRoot extends VersionedAggregateRoot {
 

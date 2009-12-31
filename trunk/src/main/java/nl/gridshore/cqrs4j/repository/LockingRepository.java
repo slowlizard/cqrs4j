@@ -40,6 +40,8 @@ import java.util.UUID;
  * however, another thread has obtained the lock first, a ConcurrencyException is thrown.
  *
  * @author Allard Buijze
+ * @param <T> The type that this aggregate stores
+ * @since 0.3
  */
 public abstract class LockingRepository<T extends VersionedAggregateRoot> extends AbstractRepository<T> {
 
@@ -90,6 +92,7 @@ public abstract class LockingRepository<T extends VersionedAggregateRoot> extend
      * automatically recovers the lock. If, however, another thread has obtained the lock before it is recovered, a
      * ConcurrencyException is thrown.
      *
+     * @param aggregate The aggregate to store in the repository
      * @throws ConcurrencyException when another thread was first in saving the aggregate.
      */
     @Override

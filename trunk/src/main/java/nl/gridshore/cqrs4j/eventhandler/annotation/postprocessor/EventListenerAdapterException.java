@@ -22,9 +22,16 @@ import org.springframework.beans.BeansException;
  * Exception indicating that an error occurred while creating an EventListenerAdapter for an event listener
  *
  * @author Allard Buijze
+ * @since 0.2
  */
 public class EventListenerAdapterException extends BeansException {
 
+    /**
+     * Initialize an EventListenerAdapter
+     *
+     * @param message The message describing the cause of the exception
+     * @param cause   The exception causing this one
+     */
     public EventListenerAdapterException(String message, Throwable cause) {
         super(message, cause);
     }

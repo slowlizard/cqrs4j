@@ -18,11 +18,8 @@ package nl.gridshore.cqrs4j.eventhandler;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import org.springframework.integration.channel.SubscribableChannel;
-import org.springframework.integration.core.Message;
 import org.springframework.integration.message.GenericMessage;
-import org.springframework.integration.message.MessageDeliveryException;
 import org.springframework.integration.message.MessageHandler;
-import org.springframework.integration.message.MessageHandlingException;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -39,6 +36,7 @@ import java.util.concurrent.ConcurrentMap;
  * org.springframework.integration.message.MessageHandler MessageHandlers}
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public class SpringIntegrationEventBus implements EventBus {
 
@@ -81,17 +79,4 @@ public class SpringIntegrationEventBus implements EventBus {
         this.channel = channel;
     }
 
-    private class MessageHandlerAdapter implements MessageHandler {
-
-        private final EventListener eventListener;
-
-        public MessageHandlerAdapter(EventListener eventListener) {
-            this.eventListener = eventListener;
-        }
-
-        @Override
-        public void handleMessage(Message<?> message) throws MessageHandlingException, MessageDeliveryException {
-            eventListener.handle((DomainEvent) message.getPayload());
-        }
-    }
 }
