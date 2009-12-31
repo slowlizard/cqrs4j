@@ -84,31 +84,4 @@ public class EventContainerTest {
         assertEquals(new Long(124), domainEvent2.getSequenceNumber());
     }
 
-    @SuppressWarnings({"EqualsBetweenInconvertibleTypes"})
-    @Test
-    public void testEquality() {
-        UUID identifier = UUID.randomUUID();
-        EventContainer container1 = new EventContainer(identifier);
-        EventContainer container2 = new EventContainer(identifier);
-        EventContainer container3 = new EventContainer(UUID.randomUUID());
-
-        assertFalse(container1.equals(new StubDomainEvent()));
-
-        assertTrue(container1.equals(container1));
-        assertEquals(container1.hashCode(), container1.hashCode());
-
-        assertTrue(container1.equals(container2));
-        assertEquals(container1.hashCode(), container2.hashCode());
-
-        assertFalse(container1.equals(container3));
-
-        container1.addEvent(new StubDomainEvent());
-
-        assertFalse(container1.equals(container2));
-
-        container2.addEvent(new StubDomainEvent());
-
-        assertTrue(container1.equals(container2));
-        assertEquals(container1.hashCode(), container2.hashCode());
-    }
 }

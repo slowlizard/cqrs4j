@@ -118,43 +118,6 @@ class EventContainer {
     }
 
     /**
-     * Checks the equality of two event containers. They are considered equal if they contain the same events for the
-     * same aggregate.
-     *
-     * @param o the other container
-     * @return true if the two containers are equal, otherwise false.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        EventContainer that = (EventContainer) o;
-
-        if (aggregateIdentifier != null ? !aggregateIdentifier.equals(that.aggregateIdentifier) :
-                that.aggregateIdentifier != null) {
-            return false;
-        }
-        if (events != null ? !events.equals(that.events) : that.events != null) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return aggregateIdentifier != null ? aggregateIdentifier.hashCode() : 0;
-    }
-
-    /**
      * Clears the events in this container. The sequence number is not modified by this call.
      */
     public void clear() {
