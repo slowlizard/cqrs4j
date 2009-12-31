@@ -54,7 +54,7 @@ import java.util.UUID;
  */
 public class XStreamFileSystemEventStore implements EventStore {
 
-    private XStream xStream;
+    private final XStream xStream;
     private Resource baseDir;
 
     /**

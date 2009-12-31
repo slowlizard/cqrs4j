@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 class OptimisticLockManager implements LockManager {
 
-    private ConcurrentHashMap<UUID, Long> versionMap = new ConcurrentHashMap<UUID, Long>();
+    private final ConcurrentHashMap<UUID, Long> versionMap = new ConcurrentHashMap<UUID, Long>();
 
     /**
      * {@inheritDoc}
