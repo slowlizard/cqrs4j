@@ -20,6 +20,7 @@ package nl.gridshore.cqrs4j.repository.eventsourcing;
  * Indicates that the given events stream could not be stored or read due to an underlying exception.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public class EventStorageException extends RuntimeException {
 

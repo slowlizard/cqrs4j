@@ -27,6 +27,7 @@ import java.util.UUID;
  * followed the previous one. No events may be <i>skipped</i>.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public interface EventStream {
 

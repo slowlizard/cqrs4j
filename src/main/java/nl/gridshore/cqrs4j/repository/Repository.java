@@ -25,6 +25,7 @@ import java.util.UUID;
  *
  * @author Allard Buijze
  * @param <T> The type of aggregate this repository stores.
+ * @since 0.1
  */
 public interface Repository<T extends AggregateRoot> {
 

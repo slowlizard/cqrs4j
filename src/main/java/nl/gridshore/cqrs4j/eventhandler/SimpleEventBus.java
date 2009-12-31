@@ -28,6 +28,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * (in the callers' thread) to all subscribed listeners.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public class SimpleEventBus implements EventBus {
 

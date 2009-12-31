@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * in the executor.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public class BufferingAnnotationEventListenerAdapter extends AnnotationEventListenerAdapter {
 
@@ -180,10 +181,10 @@ public class BufferingAnnotationEventListenerAdapter extends AnnotationEventList
      * Sets the TaskExecutor that should host the thread of the poller. If not set, a simple one-thread task executor is
      * created.
      *
-     * @param executor the executor to use for the Poller
+     * @param taskExecutor the executor to use for the Poller
      */
-    public void setTaskExecutor(AsyncTaskExecutor executor) {
-        this.executor = executor;
+    public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
+        this.executor = taskExecutor;
     }
 
 }

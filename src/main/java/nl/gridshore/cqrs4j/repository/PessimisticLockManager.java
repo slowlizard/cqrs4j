@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * until a lock could be obtained. If a lock is obtained by a thread, that thread has guaranteed unique access.
  *
  * @author Allard Buijze
+ * @since 0.3
  */
 class PessimisticLockManager implements LockManager {
 

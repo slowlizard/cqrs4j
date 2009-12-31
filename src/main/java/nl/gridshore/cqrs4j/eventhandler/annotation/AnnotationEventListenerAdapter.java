@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationContextAware;
  * ApplicationContext.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public class AnnotationEventListenerAdapter
         implements EventListener, ApplicationContextAware, InitializingBean, DisposableBean {
@@ -72,9 +73,10 @@ public class AnnotationEventListenerAdapter
 
     /**
      * Returns the configuration of the event handler that would process the given <code>event</code>. Returns
-     * </code>null</code> if no event handler is found for the given event.
+     * <code>null</code> if no event handler is found for the given event.
      *
      * @param event the event for which to search configuration.
+     * @return the annotation on the event handler method
      */
     public nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler getConfigurationFor(DomainEvent event) {
         return eventHandlerInvoker.findEventHandlerConfiguration(event);
@@ -128,6 +130,5 @@ public class AnnotationEventListenerAdapter
     public void setEventBus(EventBus eventBus) {
         this.eventBus = eventBus;
     }
-
 
 }

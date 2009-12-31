@@ -36,8 +36,10 @@ import java.util.UUID;
  * deal with concurrency. Alternatively, consider using the {@link nl.gridshore.cqrs4j.repository.LockingRepository}.
  *
  * @author Allard Buijze
+ * @param <T> The type of aggregate this repository stores
  * @see #setEventBus(nl.gridshore.cqrs4j.eventhandler.EventBus)
  * @see nl.gridshore.cqrs4j.repository.LockingRepository
+ * @since 0.1
  */
 public abstract class AbstractRepository<T extends AggregateRoot> implements Repository<T> {
 

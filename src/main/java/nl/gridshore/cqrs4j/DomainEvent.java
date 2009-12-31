@@ -25,6 +25,7 @@ import java.util.UUID;
  * event sourcing engines or dispatchers.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public abstract class DomainEvent {
 
@@ -61,6 +62,11 @@ public abstract class DomainEvent {
         return sequenceNumber;
     }
 
+    /**
+     * Returns the identifier of the aggregate that reported this event
+     *
+     * @return the identifier of the aggregate that reported this event
+     */
     public UUID getAggregateIdentifier() {
         return aggregateIdentifier;
     }

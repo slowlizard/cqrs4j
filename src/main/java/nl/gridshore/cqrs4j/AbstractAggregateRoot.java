@@ -26,6 +26,7 @@ import java.util.UUID;
  * nl.gridshore.cqrs4j.EventStream}, which can be used for event sourcing.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public abstract class AbstractAggregateRoot implements EventSourcedAggregateRoot {
 

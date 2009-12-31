@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @see org.springframework.transaction.annotation.Transactional
  * @see AnnotationEventListenerBeanPostProcessor
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter
+ * @since 0.1
  */
 public class TransactionalAnnotationEventListenerBeanPostProcessor extends AnnotationEventListenerBeanPostProcessor {
 
@@ -50,6 +51,7 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
      * listeners.
      *
      * @param bean the bean to adapt
+     * @return an annotation event listener adapter for the given bean
      */
     @Override
     protected BufferingAnnotationEventListenerAdapter createAdapterFor(Object bean) {
@@ -77,14 +79,7 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
 
     private boolean transactionalAnnotationOnMethod(Object bean) {
         final AtomicBoolean found = new AtomicBoolean(false);
-        ReflectionUtils.doWithMethods(bean.getClass(), new ReflectionUtils.MethodCallback() {
-            @Override
-            public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-                if (AnnotationUtils.getAnnotation(method, Transactional.class) != null) {
-                    found.set(true);
-                }
-            }
-        });
+        ReflectionUtils.doWithMethods(bean.getClass(), new IsTransactionalMethodCallback(found));
         return found.get();
     }
 
@@ -116,5 +111,21 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
      */
     public void setRetryDelayMillis(long retryDelayMillis) {
         this.retryDelayMillis = retryDelayMillis;
+    }
+
+    private static class IsTransactionalMethodCallback implements ReflectionUtils.MethodCallback {
+
+        private final AtomicBoolean found;
+
+        public IsTransactionalMethodCallback(AtomicBoolean found) {
+            this.found = found;
+        }
+
+        @Override
+        public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+            if (AnnotationUtils.getAnnotation(method, Transactional.class) != null) {
+                found.set(true);
+            }
+        }
     }
 }

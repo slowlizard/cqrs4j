@@ -23,6 +23,7 @@ import net.sf.cglib.core.DefaultNamingPolicy;
  * generated for cqrs4j, and which cglib classes were generated for other purposes.
  *
  * @author Allard Buijze
+ * @since 0.3
  */
 class Cqrs4jNamingPolicy extends DefaultNamingPolicy {
 

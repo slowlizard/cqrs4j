@@ -25,6 +25,7 @@ import java.util.UUID;
  * Creates an EventStream that streams the contents of a list.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public class SimpleEventStream implements EventStream {
 

@@ -44,6 +44,7 @@ import java.lang.annotation.Target;
  * @author Allard Buijze
  * @see AnnotationEventListenerAdapter
  * @see TransactionalAnnotationEventListenerAdapter
+ * @since 0.1
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -58,8 +59,6 @@ public @interface EventHandler {
      * <p/>
      * Note that this value is ignored by {@link nl.gridshore.cqrs4j.eventhandler.EventListener}s that are unaware of
      * transactional processing.
-     *
-     * @return an integer specifying the amount of events to deal with in a single transaction
      *
      * @see BufferingAnnotationEventListenerAdapter
      */

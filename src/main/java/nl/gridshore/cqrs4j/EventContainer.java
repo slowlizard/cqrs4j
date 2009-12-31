@@ -29,6 +29,7 @@ import java.util.UUID;
  * @author Allard Buijze
  * @see nl.gridshore.cqrs4j.DomainEvent
  * @see nl.gridshore.cqrs4j.AbstractAggregateRoot
+ * @since 0.1
  */
 class EventContainer {
 

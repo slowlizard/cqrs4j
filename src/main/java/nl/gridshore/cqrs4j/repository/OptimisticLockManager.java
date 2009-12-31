@@ -31,11 +31,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Allard Buijze
  * @see nl.gridshore.cqrs4j.EventSourcedAggregateRoot
  * @see ConcurrencyException
+ * @since 0.3
  */
 class OptimisticLockManager implements LockManager {
 
     private ConcurrentHashMap<UUID, Long> versionMap = new ConcurrentHashMap<UUID, Long>();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean validateLock(VersionedAggregateRoot aggregate) {
         long newVersion = aggregate.getLastCommittedEventSequenceNumber()
@@ -48,11 +52,17 @@ class OptimisticLockManager implements LockManager {
                                       newVersion);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void obtainLock(UUID aggregateIdentifier) {
         versionMap.putIfAbsent(aggregateIdentifier, Long.MIN_VALUE);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void releaseLock(UUID aggregateIdentifier) {
     }

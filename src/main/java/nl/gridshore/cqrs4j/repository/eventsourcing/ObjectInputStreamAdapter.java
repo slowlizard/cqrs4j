@@ -30,6 +30,7 @@ import java.util.UUID;
  * no events in the ObjectInputStream, the aggregate identifier cannot be resolved and will return null.
  *
  * @author Allard Buijze
+ * @since 0.1
  */
 public class ObjectInputStreamAdapter implements EventStream {
 

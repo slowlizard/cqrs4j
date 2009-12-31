@@ -20,6 +20,7 @@ package nl.gridshore.cqrs4j.repository;
  * Enum indicating possible locking strategies for repositories.
  *
  * @author Allard Buijze
+ * @since 0.3
  */
 public enum LockingStrategy {
 

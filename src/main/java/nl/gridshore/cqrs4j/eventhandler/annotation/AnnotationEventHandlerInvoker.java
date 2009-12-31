@@ -22,10 +22,13 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  * Utility class that supports invocation of specific handler methods for a given event. See {@link
@@ -33,6 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author Allard Buijze
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
+ * @since 0.1
  */
 class AnnotationEventHandlerInvoker {
 
@@ -114,14 +118,14 @@ class AnnotationEventHandlerInvoker {
      * @param event the event to handle
      */
     protected void invokeEventHandlerMethod(DomainEvent event) {
-        Method m = findEventHandlerMethod(event.getClass());
+        final Method m = findEventHandlerMethod(event.getClass());
         if (m == null) {
             // event listener doesn't support this type of event
             return;
         }
         try {
             if (!m.isAccessible()) {
-                m.setAccessible(true);
+                doPrivileged(new PrivilegedAccessibilityAction(m));
             }
             m.invoke(target, event);
         } catch (IllegalAccessException e) {
@@ -169,25 +173,52 @@ class AnnotationEventHandlerInvoker {
 
     private void scanHierarchyForEventHandler(final Class<? extends DomainEvent> eventClass) {
         final AtomicReference<Method> bestMethodSoFar = new AtomicReference<Method>(null);
-        ReflectionUtils.doWithMethods(target.getClass(), new ReflectionUtils.MethodCallback() {
-            @Override
-            public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-                if (method.isAnnotationPresent(EventHandler.class)
-                        && method.getParameterTypes()[0].isAssignableFrom(eventClass)) {
-                    // method is eligible, but is it the best?
-                    if (bestMethodSoFar.get() == null) {
-                        // if we have none yet, this one is the best
-                        bestMethodSoFar.set(method);
-                    } else if (bestMethodSoFar.get().getDeclaringClass().equals(method.getDeclaringClass())
-                            && bestMethodSoFar.get().getParameterTypes()[0].isAssignableFrom(
-                            method.getParameterTypes()[0])) {
-                        // this one is more specific, so it wins
-                        bestMethodSoFar.set(method);
-                    }
-                }
-            }
-        });
+        ReflectionUtils.doWithMethods(target.getClass(), new MostSuitableEventHandlerCallback(eventClass,
+                                                                                              bestMethodSoFar));
         eventHandlers.put(eventClass, bestMethodSoFar.get());
     }
 
+    private static class PrivilegedAccessibilityAction implements PrivilegedAction<Object> {
+
+        private final Method m;
+
+        public PrivilegedAccessibilityAction(Method m) {
+            this.m = m;
+        }
+
+        @Override
+        public Object run() {
+            m.setAccessible(true);
+            return Void.class;
+        }
+    }
+
+    private static class MostSuitableEventHandlerCallback implements ReflectionUtils.MethodCallback {
+
+        private final Class<? extends DomainEvent> eventClass;
+        private final AtomicReference<Method> bestMethodSoFar;
+
+        public MostSuitableEventHandlerCallback(Class<? extends DomainEvent> eventClass,
+                                                AtomicReference<Method> bestMethodSoFar) {
+            this.eventClass = eventClass;
+            this.bestMethodSoFar = bestMethodSoFar;
+        }
+
+        @Override
+        public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+            if (method.isAnnotationPresent(EventHandler.class)
+                    && method.getParameterTypes()[0].isAssignableFrom(eventClass)) {
+                // method is eligible, but is it the best?
+                if (bestMethodSoFar.get() == null) {
+                    // if we have none yet, this one is the best
+                    bestMethodSoFar.set(method);
+                } else if (bestMethodSoFar.get().getDeclaringClass().equals(method.getDeclaringClass())
+                        && bestMethodSoFar.get().getParameterTypes()[0].isAssignableFrom(
+                        method.getParameterTypes()[0])) {
+                    // this one is more specific, so it wins
+                    bestMethodSoFar.set(method);
+                }
+            }
+        }
+    }
 }

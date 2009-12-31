@@ -34,6 +34,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
  * @see TransactionalAnnotationEventListenerBeanPostProcessor
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.BufferingAnnotationEventListenerAdapter
+ * @since 0.1
  */
 public class AnnotationEventListenerBeanPostProcessor extends BaseAnnotationEventListenerBeanPostProcessor {
 
@@ -75,6 +76,5 @@ public class AnnotationEventListenerBeanPostProcessor extends BaseAnnotationEven
     public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
-
 
 }

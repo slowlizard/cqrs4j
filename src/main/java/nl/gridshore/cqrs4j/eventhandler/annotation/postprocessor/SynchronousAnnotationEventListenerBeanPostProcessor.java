@@ -27,6 +27,7 @@ import nl.gridshore.cqrs4j.eventhandler.annotation.AnnotationEventListenerAdapte
  * delivery.
  *
  * @author Allard Buijze
+ * @since 0.3
  */
 public class SynchronousAnnotationEventListenerBeanPostProcessor extends BaseAnnotationEventListenerBeanPostProcessor {
 

@@ -30,11 +30,13 @@ import java.util.UUID;
  * storage to the provided {@link nl.gridshore.cqrs4j.repository.eventsourcing.EventStore}.
  *
  * @author Allard Buijze
+ * @param <T> The type of aggregate this repository stores
  * @see nl.gridshore.cqrs4j.EventSourcedAggregateRoot
  * @see nl.gridshore.cqrs4j.AbstractAggregateRoot
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.AbstractAnnotatedAggregateRoot
  * @see nl.gridshore.cqrs4j.repository.eventsourcing.EventStore
  * @see nl.gridshore.cqrs4j.repository.eventsourcing.XStreamFileSystemEventStore
+ * @since 0.1
  */
 public abstract class EventSourcingRepository<T extends EventSourcedAggregateRoot> extends LockingRepository<T> {
 

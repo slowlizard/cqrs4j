@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
  *
  * @author Allard Buijze
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
+ * @since 0.1
  */
 public class UnsupportedHandlerMethodException extends RuntimeException {
 
