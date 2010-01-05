@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.UUID;
  */
 public class StubDomainEvent extends DomainEvent implements Serializable {
 
-
     public StubDomainEvent() {
     }
 
@@ -39,5 +38,15 @@ public class StubDomainEvent extends DomainEvent implements Serializable {
     public StubDomainEvent(UUID aggregateIdentifier, int sequenceNumber) {
         setAggregateIdentifier(aggregateIdentifier);
         setSequenceNumber(sequenceNumber);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("StubDomainEvent aggregate [");
+        sb.append(getAggregateIdentifier());
+        sb.append("] sequenceNo [");
+        sb.append(getSequenceNumber());
+        sb.append("]");
+        return sb.toString();
     }
 }
