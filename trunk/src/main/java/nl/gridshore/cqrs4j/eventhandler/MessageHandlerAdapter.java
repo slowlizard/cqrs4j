@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,9 @@ class MessageHandlerAdapter implements MessageHandler {
      */
     @Override
     public void handleMessage(Message<?> message) throws MessageHandlingException, MessageDeliveryException {
-        eventListener.handle((DomainEvent) message.getPayload());
+        DomainEvent event = (DomainEvent) message.getPayload();
+        if (eventListener.canHandle(event.getClass())) {
+            eventListener.handle(event);
+        }
     }
 }
