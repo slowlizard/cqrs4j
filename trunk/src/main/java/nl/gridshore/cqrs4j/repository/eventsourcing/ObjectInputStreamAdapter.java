@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package nl.gridshore.cqrs4j.repository.eventsourcing;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.EventStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -33,6 +35,8 @@ import java.util.UUID;
  * @since 0.1
  */
 public class ObjectInputStreamAdapter implements EventStream {
+
+    private static final Logger logger = LoggerFactory.getLogger(ObjectInputStreamAdapter.class);
 
     private final ObjectInputStream objectInputStream;
     private final UUID aggregateIdentifier;
@@ -91,7 +95,7 @@ public class ObjectInputStreamAdapter implements EventStream {
         try {
             return (DomainEvent) objectStream.readObject();
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.warn("ClassNotFoundException when importing an Event Stream. Event is skipped.", e);
             // move to the next event
             return readIfAvailable(objectStream);
         } catch (EOFException e) {
