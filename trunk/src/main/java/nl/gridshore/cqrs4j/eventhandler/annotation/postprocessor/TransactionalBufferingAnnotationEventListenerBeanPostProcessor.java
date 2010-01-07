@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor;
 
 import nl.gridshore.cqrs4j.eventhandler.annotation.BufferingAnnotationEventListenerAdapter;
-import nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter;
+import nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalBufferingAnnotationEventListenerAdapter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,21 +27,22 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Implementation of the {@link AnnotationEventListenerBeanPostProcessor} that checks event listeners for the
+ * Implementation of the {@link BufferingAnnotationEventListenerBeanPostProcessor} that checks event listeners for the
  * availability of a {@link org.springframework.transaction.annotation.Transactional} annotation. If one is found, a
- * {@link nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter transaction aware
- * event listener adapter} is used to adapt the bean.
+ * {@link nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalBufferingAnnotationEventListenerAdapter transaction
+ * aware event listener adapter} is used to adapt the bean.
  * <p/>
  * Note: even if only a single method is marked as {@link org.springframework.transaction.annotation.Transactional}, all
  * event handlers will be called within a transaction.
  *
  * @author Allard Buijze
  * @see org.springframework.transaction.annotation.Transactional
- * @see AnnotationEventListenerBeanPostProcessor
- * @see nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter
+ * @see BufferingAnnotationEventListenerBeanPostProcessor
+ * @see nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalBufferingAnnotationEventListenerAdapter
  * @since 0.1
  */
-public class TransactionalAnnotationEventListenerBeanPostProcessor extends AnnotationEventListenerBeanPostProcessor {
+public class TransactionalBufferingAnnotationEventListenerBeanPostProcessor extends
+                                                                            BufferingAnnotationEventListenerBeanPostProcessor {
 
     private PlatformTransactionManager transactionManager;
     private long retryDelayMillis = 1000;
@@ -58,7 +59,8 @@ public class TransactionalAnnotationEventListenerBeanPostProcessor extends Annot
         if (!isTransactional(bean)) {
             return new BufferingAnnotationEventListenerAdapter(bean);
         }
-        TransactionalAnnotationEventListenerAdapter adapter = new TransactionalAnnotationEventListenerAdapter(bean);
+        TransactionalBufferingAnnotationEventListenerAdapter adapter = new TransactionalBufferingAnnotationEventListenerAdapter(
+                bean);
 
         adapter.setTransactionManager(transactionManager);
         adapter.setRetryDelayMillis(retryDelayMillis);

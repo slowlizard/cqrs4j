@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.annotation.BufferingAnnotationEventListenerAdapter;
-import nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalAnnotationEventListenerAdapter;
+import nl.gridshore.cqrs4j.eventhandler.annotation.TransactionalBufferingAnnotationEventListenerAdapter;
 import org.junit.*;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,13 +29,13 @@ import static org.mockito.Mockito.*;
 /**
  * @author Allard Buijze
  */
-public class TransactionalAnnotationEventHandlerBeanPostProcessorTest {
+public class TransactionalBufferingAnnotationEventHandlerBeanPostProcessorTest {
 
-    private TransactionalAnnotationEventListenerBeanPostProcessor testSubject;
+    private TransactionalBufferingAnnotationEventListenerBeanPostProcessor testSubject;
 
     @Before
     public void setUp() {
-        testSubject = new TransactionalAnnotationEventListenerBeanPostProcessor();
+        testSubject = new TransactionalBufferingAnnotationEventListenerBeanPostProcessor();
         testSubject.setTransactionManager(mock(PlatformTransactionManager.class));
     }
 
@@ -48,20 +48,20 @@ public class TransactionalAnnotationEventHandlerBeanPostProcessorTest {
     @Test
     public void testAdapt_TransactionOnClass() {
         BufferingAnnotationEventListenerAdapter actualResult = testSubject.adapt(new TransactionOnClassEventHandler());
-        assertEquals(TransactionalAnnotationEventListenerAdapter.class, actualResult.getClass());
+        assertEquals(TransactionalBufferingAnnotationEventListenerAdapter.class, actualResult.getClass());
     }
 
     @Test
     public void testAdapt_TransactionOnMethod() {
         BufferingAnnotationEventListenerAdapter actualResult = testSubject.adapt(new TransactionOnMethodEventHandler());
-        assertEquals(TransactionalAnnotationEventListenerAdapter.class, actualResult.getClass());
+        assertEquals(TransactionalBufferingAnnotationEventListenerAdapter.class, actualResult.getClass());
     }
 
     @Test
     public void testAdapt_TransactionOnSuperClass() {
         BufferingAnnotationEventListenerAdapter actualResult = testSubject
                 .adapt(new TransactionInheritedEventHandler());
-        assertEquals(TransactionalAnnotationEventListenerAdapter.class, actualResult.getClass());
+        assertEquals(TransactionalBufferingAnnotationEventListenerAdapter.class, actualResult.getClass());
     }
 
     private static class NonTransactionalEventHandler {
@@ -93,6 +93,5 @@ public class TransactionalAnnotationEventHandlerBeanPostProcessorTest {
             // we don't care
         }
     }
-
 
 }

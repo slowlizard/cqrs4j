@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,65 +16,27 @@
 
 package nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor;
 
-import nl.gridshore.cqrs4j.eventhandler.annotation.BufferingAnnotationEventListenerAdapter;
-import org.springframework.core.task.AsyncTaskExecutor;
+import nl.gridshore.cqrs4j.eventhandler.annotation.AnnotationEventListenerAdapter;
 
 /**
  * Spring Bean post processor that automatically generates an adapter for each bean containing {@link
  * nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler} annotated methods.
  * <p/>
- * Optionally, this bean can be configured with an {@link org.springframework.core.task.AsyncTaskExecutor} that will be
- * used by the adapters to register their pollers. This task executor must contain at least one thread per adapter
- * created (meaning one per bean with {@link nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler} annotation).
- * <p/>
- * Beans that already implement the {@link nl.gridshore.cqrs4j.eventhandler.EventListener} interface are skipped, even
- * if they contain a method with the {@link nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler} annotation.
+ * The beans processed by this bean post processor will handle events in the thread that delivers them. This makes this
+ * post processor useful in the case of tests or when the dispatching mechanism takes care of asynchronous event
+ * delivery, such as with the {@link nl.gridshore.cqrs4j.eventhandler.AsyncEventBus}.
  *
  * @author Allard Buijze
- * @see TransactionalAnnotationEventListenerBeanPostProcessor
- * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
- * @see nl.gridshore.cqrs4j.eventhandler.annotation.BufferingAnnotationEventListenerAdapter
- * @since 0.1
+ * @see nl.gridshore.cqrs4j.eventhandler.AsyncEventBus
+ * @since 0.3
  */
 public class AnnotationEventListenerBeanPostProcessor extends BaseAnnotationEventListenerBeanPostProcessor {
 
-    private AsyncTaskExecutor taskExecutor;
-
     /**
-     * Creates a BufferingAnnotationEventListenerAdapter for the given bean. For implementation specific modifications,
-     * subclasses should implement the {@link #createAdapterFor(Object)} method.
-     *
-     * @param bean The bean for which to create an adapter
-     * @return a BufferingAnnotationEventListenerAdapter for the given bean
+     * {@inheritDoc}
      */
     @Override
-    protected BufferingAnnotationEventListenerAdapter adapt(Object bean) {
-        BufferingAnnotationEventListenerAdapter adapter = createAdapterFor(bean);
-        if (taskExecutor != null) {
-            adapter.setTaskExecutor(taskExecutor);
-        }
-        return adapter;
+    protected AnnotationEventListenerAdapter adapt(Object bean) {
+        return new AnnotationEventListenerAdapter(bean);
     }
-
-    /**
-     * Create a BufferingAnnotationEventListenerAdapter (or subclass) for the given bean. Specialized implementations
-     * should override this method if they wish to create a different type of adapter for the given bean.
-     *
-     * @param bean the bean for which to create an adapter
-     * @return the adapter for the given bean
-     */
-    protected BufferingAnnotationEventListenerAdapter createAdapterFor(Object bean) {
-        return new BufferingAnnotationEventListenerAdapter(bean);
-    }
-
-    /**
-     * The task executor that the adapters should use to host the pollers thread. Optional. By default, a new single
-     * thread task executor is created.
-     *
-     * @param taskExecutor the task executor that should host the adapters poller thread
-     */
-    public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
-    }
-
 }
