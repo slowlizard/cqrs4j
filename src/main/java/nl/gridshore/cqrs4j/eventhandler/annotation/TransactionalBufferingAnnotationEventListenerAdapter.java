@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,12 +46,13 @@ import java.util.concurrent.TimeUnit;
  * @author Allard Buijze
  * @see org.springframework.transaction.annotation.Transactional
  * @see nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler
- * @see nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor.TransactionalAnnotationEventListenerBeanPostProcessor
+ * @see nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor.TransactionalBufferingAnnotationEventListenerBeanPostProcessor
  * @since 0.1
  */
-public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnotationEventListenerAdapter {
+public class TransactionalBufferingAnnotationEventListenerAdapter extends BufferingAnnotationEventListenerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(TransactionalAnnotationEventListenerAdapter.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(TransactionalBufferingAnnotationEventListenerAdapter.class);
     private static final List<Class<? extends Exception>> transientExceptions =
             Arrays.asList(
                     RecoverableDataAccessException.class,
@@ -65,11 +66,12 @@ public class TransactionalAnnotationEventListenerAdapter extends BufferingAnnota
     private long retryDelayMillis = 1000;
 
     /**
-     * Initialize the TransactionalAnnotationEventListenerAdapter for the given <code>annotatedEventListener</code>.
+     * Initialize the TransactionalBufferingAnnotationEventListenerAdapter for the given
+     * <code>annotatedEventListener</code>.
      *
      * @param annotatedEventListener the event listener
      */
-    public TransactionalAnnotationEventListenerAdapter(Object annotatedEventListener) {
+    public TransactionalBufferingAnnotationEventListenerAdapter(Object annotatedEventListener) {
         super(annotatedEventListener);
 
     }

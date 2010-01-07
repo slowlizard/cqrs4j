@@ -26,13 +26,13 @@ import static org.mockito.Mockito.*;
 /**
  * @author Allard Buijze
  */
-public class AnnotationEventListenerBeanPostProcessorTest {
+public class BufferingAnnotationEventListenerBeanPostProcessorTest {
 
-    private AnnotationEventListenerBeanPostProcessor testSubject;
+    private BufferingAnnotationEventListenerBeanPostProcessor testSubject;
 
     @Test
     public void testExecutorServiceInjectedProperly() {
-        testSubject = spy(new AnnotationEventListenerBeanPostProcessor());
+        testSubject = spy(new BufferingAnnotationEventListenerBeanPostProcessor());
         BufferingAnnotationEventListenerAdapter eventListenerAdapter = spy(testSubject.createAdapterFor(new Object()));
         doReturn(eventListenerAdapter).when(testSubject).createAdapterFor(any());
         AsyncTaskExecutor mockTaskExecutor = mock(AsyncTaskExecutor.class);

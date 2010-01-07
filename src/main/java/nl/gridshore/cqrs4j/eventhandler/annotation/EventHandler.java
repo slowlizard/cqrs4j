@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
  *
  * @author Allard Buijze
  * @see AnnotationEventListenerAdapter
- * @see TransactionalAnnotationEventListenerAdapter
+ * @see TransactionalBufferingAnnotationEventListenerAdapter
  * @since 0.1
  */
 @Documented
