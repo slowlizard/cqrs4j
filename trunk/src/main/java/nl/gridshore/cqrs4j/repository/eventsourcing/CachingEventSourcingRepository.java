@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ import java.util.UUID;
 public abstract class CachingEventSourcingRepository<T extends EventSourcedAggregateRoot>
         extends EventSourcingRepository<T> {
 
-    private Cache cache = new NoCache();
+    private static final NoCache DEFAULT_CACHE = new NoCache();
+
+    private Cache cache = DEFAULT_CACHE;
 
     /**
      * Initializes a repository with a pessimistic locking strategy. Optimistic locking is not compatible with caching.
