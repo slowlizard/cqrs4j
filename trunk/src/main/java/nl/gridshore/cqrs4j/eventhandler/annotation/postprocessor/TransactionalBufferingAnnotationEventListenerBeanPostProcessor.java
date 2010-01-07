@@ -34,6 +34,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p/>
  * Note: even if only a single method is marked as {@link org.springframework.transaction.annotation.Transactional}, all
  * event handlers will be called within a transaction.
+ * <p/>
+ * Do not use this post processor in combination with the {@link nl.gridshore.cqrs4j.eventhandler.AsyncEventBus}, as it
+ * will manage transactions too. Consider using the {@link AnnotationEventListenerBeanPostProcessor} in that case
+ * instead.
  *
  * @author Allard Buijze
  * @see org.springframework.transaction.annotation.Transactional
