@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,12 +198,15 @@ class AnnotationEventHandlerInvoker {
         private final Class<? extends DomainEvent> eventClass;
         private final AtomicReference<Method> bestMethodSoFar;
 
-        public MostSuitableEventHandlerCallback(Class<? extends DomainEvent> eventClass,
-                                                AtomicReference<Method> bestMethodSoFar) {
+        private MostSuitableEventHandlerCallback(Class<? extends DomainEvent> eventClass,
+                                                 AtomicReference<Method> bestMethodSoFar) {
             this.eventClass = eventClass;
             this.bestMethodSoFar = bestMethodSoFar;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
             if (method.isAnnotationPresent(EventHandler.class)

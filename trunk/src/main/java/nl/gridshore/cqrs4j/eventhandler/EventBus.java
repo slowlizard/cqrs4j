@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@ import nl.gridshore.cqrs4j.DomainEvent;
  * Implementations may or may not dispatch the events to event listeners in the dispatching thread.
  *
  * @author Allard Buijze
- * @see nl.gridshore.cqrs4j.eventhandler.EventListener
- * @see nl.gridshore.cqrs4j.eventhandler.SimpleEventBus
- * @see nl.gridshore.cqrs4j.eventhandler.SpringIntegrationEventBus
+ * @see EventListener
+ * @see SynchronousEventBus
+ * @see AsyncEventBus
+ * @see SpringIntegrationEventBus
  * @since 0.1
  */
 public interface EventBus {

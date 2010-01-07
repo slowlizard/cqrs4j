@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,4 +46,11 @@ public interface EventListener {
      * @param event the event to handle
      */
     void handle(DomainEvent event);
+
+    /**
+     * The Event Handling serialization policy applicable to this event listener.
+     *
+     * @return the Event Handling serialization policy applicable to this event listener
+     */
+    EventHandlingSerializationPolicy getEventHandlingSerializationPolicy();
 }

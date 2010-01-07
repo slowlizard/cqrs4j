@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor;
 import net.sf.cglib.proxy.Enhancer;
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
+import nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy;
 import nl.gridshore.cqrs4j.eventhandler.EventListener;
+import nl.gridshore.cqrs4j.eventhandler.FullySerializedPolicy;
 import nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler;
 import org.junit.*;
 import org.springframework.context.ApplicationContext;
@@ -88,6 +90,11 @@ public class AnnotationEventHandlerBeanPostProcessorTest {
         @EventHandler
         public void handleEvent(DomainEvent event) {
 
+        }
+
+        @Override
+        public EventHandlingSerializationPolicy getEventHandlingSerializationPolicy() {
+            return new FullySerializedPolicy();
         }
     }
 }

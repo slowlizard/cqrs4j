@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@ package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
+import nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy;
 import nl.gridshore.cqrs4j.eventhandler.EventListener;
+import nl.gridshore.cqrs4j.eventhandler.FullySerializedPolicy;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * Adapter that turns any bean with {@link nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler} annotated methods
@@ -44,6 +47,7 @@ public class AnnotationEventListenerAdapter
     private ApplicationContext applicationContext;
     private final Object target;
     private final AnnotationEventHandlerInvoker eventHandlerInvoker;
+    private final EventHandlingSerializationPolicy eventHandlingSerializationPolicy;
 
     /**
      * Initialize the AnnotationEventListenerAdapter for the given <code>annotatedEventListener</code>.
@@ -52,6 +56,7 @@ public class AnnotationEventListenerAdapter
      */
     public AnnotationEventListenerAdapter(Object annotatedEventListener) {
         eventHandlerInvoker = new AnnotationEventHandlerInvoker(annotatedEventListener);
+        eventHandlingSerializationPolicy = getSerializationPolicyFor(annotatedEventListener);
         this.target = annotatedEventListener;
     }
 
@@ -69,6 +74,14 @@ public class AnnotationEventListenerAdapter
     @Override
     public void handle(DomainEvent event) {
         eventHandlerInvoker.invokeEventHandlerMethod(event);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public EventHandlingSerializationPolicy getEventHandlingSerializationPolicy() {
+        return eventHandlingSerializationPolicy;
     }
 
     /**
@@ -101,6 +114,29 @@ public class AnnotationEventListenerAdapter
             eventBus = applicationContext.getBean(EventBus.class);
         }
         eventBus.subscribe(this);
+    }
+
+    private EventHandlingSerializationPolicy getSerializationPolicyFor(Object annotatedEventListener) {
+        ConcurrentEventListener annotation = AnnotationUtils.findAnnotation(annotatedEventListener.getClass(),
+                                                                            ConcurrentEventListener.class);
+        if (annotation == null) {
+            return new FullySerializedPolicy();
+        }
+
+        Class<? extends EventHandlingSerializationPolicy> policyClass = annotation.policyClass();
+        try {
+            return policyClass.newInstance();
+        } catch (InstantiationException e) {
+            throw new UnsupportedPolicyException(String.format(
+                    "Could not initialize an instance of the given policy: [%s]. "
+                            + "Does it have an accessible no-arg constructor?",
+                    policyClass.getSimpleName()), e);
+        } catch (IllegalAccessException e) {
+            throw new UnsupportedPolicyException(String.format(
+                    "Could not initialize an instance of the given policy: [%s]. "
+                            + "Is the no-arg constructor accessible?",
+                    policyClass.getSimpleName()), e);
+        }
     }
 
     /**
