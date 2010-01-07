@@ -198,8 +198,8 @@ class AnnotationEventHandlerInvoker {
         private final Class<? extends DomainEvent> eventClass;
         private final AtomicReference<Method> bestMethodSoFar;
 
-        private MostSuitableEventHandlerCallback(Class<? extends DomainEvent> eventClass,
-                                                 AtomicReference<Method> bestMethodSoFar) {
+        public MostSuitableEventHandlerCallback(Class<? extends DomainEvent> eventClass,
+                                                AtomicReference<Method> bestMethodSoFar) {
             this.eventClass = eventClass;
             this.bestMethodSoFar = bestMethodSoFar;
         }
