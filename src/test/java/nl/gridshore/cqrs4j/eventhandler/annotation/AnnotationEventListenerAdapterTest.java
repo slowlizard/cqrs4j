@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
+import nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy;
+import nl.gridshore.cqrs4j.eventhandler.FullConcurrencyPolicy;
+import nl.gridshore.cqrs4j.eventhandler.FullySerializedPolicy;
 import org.junit.*;
 import org.springframework.context.ApplicationContext;
 
@@ -46,6 +49,39 @@ public class AnnotationEventListenerAdapterTest {
         assertSame(annotatedEventHandler, adapter.getTarget());
     }
 
+    @Test
+    public void testHandlingPolicy_Default() throws Exception {
+        AnnotatedEventHandler annotatedEventHandler = new AnnotatedEventHandler();
+        AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(annotatedEventHandler);
+
+        EventHandlingSerializationPolicy actualPolicy = adapter.getEventHandlingSerializationPolicy();
+
+        assertEquals(FullySerializedPolicy.class, actualPolicy.getClass());
+    }
+
+    @Test
+    public void testHandlingPolicy_FromAnnotation() throws Exception {
+        ConcurrentAnnotatedEventHandler annotatedEventHandler = new ConcurrentAnnotatedEventHandler();
+        AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(annotatedEventHandler);
+
+        EventHandlingSerializationPolicy actualPolicy = adapter.getEventHandlingSerializationPolicy();
+
+        assertEquals(FullConcurrencyPolicy.class, actualPolicy.getClass());
+    }
+
+    @Test
+    public void testHandlingPolicy_IllegalClassFromAnnotation() throws Exception {
+        IllegalConcurrentAnnotatedEventHandler annotatedEventHandler = new IllegalConcurrentAnnotatedEventHandler();
+        try {
+            new AnnotationEventListenerAdapter(annotatedEventHandler);
+            fail("Expected UnsupportedPolicyException");
+        }
+        catch (UnsupportedPolicyException e) {
+            assertTrue("Incomplete message:" + e.getMessage(), e.getMessage().contains("IllegalConcurrencyPolicy"));
+        }
+
+    }
+
     private static class AnnotatedEventHandler {
 
         @EventHandler
@@ -54,4 +90,33 @@ public class AnnotationEventListenerAdapterTest {
 
     }
 
+    @ConcurrentEventListener(policyClass = FullConcurrencyPolicy.class)
+    private static class ConcurrentAnnotatedEventHandler {
+
+        @EventHandler
+        public void handleEvent(DomainEvent event) {
+        }
+
+    }
+
+    @ConcurrentEventListener(policyClass = IllegalConcurrencyPolicy.class)
+    private static class IllegalConcurrentAnnotatedEventHandler {
+
+        @EventHandler
+        public void handleEvent(DomainEvent event) {
+        }
+
+    }
+
+    private static class IllegalConcurrencyPolicy implements EventHandlingSerializationPolicy {
+
+        public IllegalConcurrencyPolicy(String name) {
+            // just for the sake of not having a default constructor
+        }
+
+        @Override
+        public Object getSerializationIdentifierFor(DomainEvent event) {
+            return null;
+        }
+    }
 }

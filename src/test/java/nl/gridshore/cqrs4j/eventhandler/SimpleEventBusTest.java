@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class SimpleEventBusTest {
         listener1 = mock(EventListener.class);
         listener2 = mock(EventListener.class);
         listener3 = mock(EventListener.class);
-        testSubject = new SimpleEventBus();
+        testSubject = new SynchronousEventBus();
 
         when(listener1.canHandle(StubDomainEvent.class)).thenReturn(true);
         when(listener2.canHandle(StubDomainEvent.class)).thenReturn(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,9 @@ import java.util.concurrent.ConcurrentMap;
  * <p/>
  * This EventBus will automatically wrap and unwrap events in {@link org.springframework.integration.core.Message
  * Messages} and {@link nl.gridshore.cqrs4j.eventhandler.EventListener EventListeners} in {@link
- * org.springframework.integration.message.MessageHandler MessageHandlers}
+ * org.springframework.integration.message.MessageHandler MessageHandlers}.
+ * <p/>
+ * This implementation expects the Spring Integration to be configured to handle messages asynchronously.
  *
  * @author Allard Buijze
  * @since 0.1

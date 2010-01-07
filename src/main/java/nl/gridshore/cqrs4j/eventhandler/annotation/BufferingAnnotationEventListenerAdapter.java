@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class BufferingAnnotationEventListenerAdapter extends AnnotationEventList
         try {
             queue.put(event);
         } catch (InterruptedException e) {
-            throw new RuntimeException("Unable to add event to queue", e);
+            throw new EventHandlingRejectedException("Unable to add event to queue due to an interrupt", e, event);
         }
     }
 
@@ -170,8 +170,9 @@ public class BufferingAnnotationEventListenerAdapter extends AnnotationEventList
                         handleInternal(event);
                     }
                 } catch (InterruptedException e) {
-                    // probably the thread executor is stopped
-                    logger.info("***** Thread executor stopped");
+                    logger.warn("Thread was interrupted. [{}] will switch to 'best-effort' mode for remaining events.",
+                                getTarget().getClass().getSimpleName());
+                    running.set(false);
                 }
             }
         }
