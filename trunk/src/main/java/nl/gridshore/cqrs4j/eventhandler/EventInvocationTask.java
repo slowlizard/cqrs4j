@@ -19,21 +19,32 @@ package nl.gridshore.cqrs4j.eventhandler;
 import nl.gridshore.cqrs4j.DomainEvent;
 
 /**
- * An EventProcessingScheduler is responsible for scheduling events for execution. Typically, an
- * EventProcessingScheduler will schedule events for a single {@link EventListener}.
+ * A Runnable instance that (eventually) invokes an event handler method on an event listener.
  *
  * @author Allard Buijze
- * @see EventListener
  * @since 0.3
  */
-public interface EventProcessingScheduler {
+public class EventInvocationTask implements Runnable {
+
+    private final EventListener eventListener;
+    private final DomainEvent event;
 
     /**
-     * Schedule an event for processing.
-     * <p/>
-     * Important note: Implementations are responsible for maintaining thread safety.
+     * Initializes this task to eventually invoke given <code>eventListener</code> with given <code>event</code> .
      *
-     * @param event the event to schedule
+     * @param eventListener the event listener to invoke
+     * @param event         the event the listener should handle
      */
-    void scheduleEvent(DomainEvent event);
+    public EventInvocationTask(EventListener eventListener, DomainEvent event) {
+        this.eventListener = eventListener;
+        this.event = event;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void run() {
+        eventListener.handle(event);
+    }
 }

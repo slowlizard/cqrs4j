@@ -38,7 +38,7 @@ import static org.junit.Assert.*;
  */
 public class ListenerManagerTest {
 
-    private ListenerInboxManager testSubject;
+    private EventHandlingSerializationManager testSubject;
     private StubEventListener mockEventListener;
     private ExecutorService executorService;
 
@@ -46,7 +46,7 @@ public class ListenerManagerTest {
     public void setUp() {
         mockEventListener = new StubEventListener();
         executorService = new ThreadPoolExecutor(25, 100, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());
-        testSubject = new ListenerInboxManager(mockEventListener, executorService);
+        testSubject = new EventHandlingSerializationManager(mockEventListener, executorService);
     }
 
     @Test

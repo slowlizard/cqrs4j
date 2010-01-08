@@ -45,16 +45,16 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
     private final static TimeUnit DEFAULT_TIME_UNIT = TimeUnit.MINUTES;
 
     private ExecutorService executorService;
-    private final ConcurrentMap<EventListener, ListenerInboxManager> listenerManagers =
-            new ConcurrentHashMap<EventListener, ListenerInboxManager>();
+    private final ConcurrentMap<EventListener, EventHandlingSerializationManager> listenerManagers =
+            new ConcurrentHashMap<EventListener, EventHandlingSerializationManager>();
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void publish(DomainEvent event) {
-        for (ListenerInboxManager listenerInbox : listenerManagers.values()) {
-            listenerInbox.addEvent(event);
+        for (EventHandlingSerializationManager eventHandlingSerialization : listenerManagers.values()) {
+            eventHandlingSerialization.addEvent(event);
         }
     }
 
@@ -64,7 +64,7 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
     @Override
     public void subscribe(EventListener eventListener) {
         if (!listenerManagers.containsKey(eventListener)) {
-            listenerManagers.putIfAbsent(eventListener, listenerManagerFor(eventListener));
+            listenerManagers.putIfAbsent(eventListener, newEventHandlingSerializationManager(eventListener));
         }
     }
 
@@ -77,6 +77,9 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
     }
 
     /**
+     * Will configure a default executor service if none has been wired. This method must be called after initialization
+     * of all properties.
+     * <p/>
      * {@inheritDoc}
      */
     @Override
@@ -100,8 +103,23 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
         }
     }
 
-    private ListenerInboxManager listenerManagerFor(EventListener eventListener) {
-        return new ListenerInboxManager(eventListener, executorService);
+    /**
+     * Creates a new EventHandlingSerializationManager for the given event listener.
+     *
+     * @param eventListener The event listener that the EventHandlingSerializationManager should manage
+     * @return a new EventHandlingSerializationManager instance
+     */
+    protected EventHandlingSerializationManager newEventHandlingSerializationManager(EventListener eventListener) {
+        return new EventHandlingSerializationManager(eventListener, getExecutorService());
+    }
+
+    /**
+     * Accessor for the executor service used to dispatch events in this event bus
+     *
+     * @return the executor service used to dispatch events in this event bus
+     */
+    protected ExecutorService getExecutorService() {
+        return executorService;
     }
 
     /**
