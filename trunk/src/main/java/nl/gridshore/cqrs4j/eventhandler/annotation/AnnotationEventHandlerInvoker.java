@@ -24,9 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static java.security.AccessController.doPrivileged;
 
@@ -40,8 +37,6 @@ import static java.security.AccessController.doPrivileged;
  */
 class AnnotationEventHandlerInvoker {
 
-    // guarded by "this"
-    private final transient Map<Class, Method> eventHandlers = new WeakHashMap<Class, Method>();
     private final Object target;
 
     /**
@@ -163,19 +158,10 @@ class AnnotationEventHandlerInvoker {
         return findEventHandlerMethod(eventClass) != null;
     }
 
-    private synchronized Method findEventHandlerMethod(Class<? extends DomainEvent> eventClass) {
-        // there is no synchronized implementation of the WeakHashMap
-        if (!eventHandlers.containsKey(eventClass)) {
-            scanHierarchyForEventHandler(eventClass);
-        }
-        return eventHandlers.get(eventClass);
-    }
-
-    private void scanHierarchyForEventHandler(final Class<? extends DomainEvent> eventClass) {
-        final AtomicReference<Method> bestMethodSoFar = new AtomicReference<Method>(null);
-        ReflectionUtils.doWithMethods(target.getClass(), new MostSuitableEventHandlerCallback(eventClass,
-                                                                                              bestMethodSoFar));
-        eventHandlers.put(eventClass, bestMethodSoFar.get());
+    private Method findEventHandlerMethod(final Class<? extends DomainEvent> eventClass) {
+        MostSuitableEventHandlerCallback callback = new MostSuitableEventHandlerCallback(eventClass);
+        ReflectionUtils.doWithMethods(target.getClass(), callback, callback);
+        return callback.foundHandler();
     }
 
     private static class PrivilegedAccessibilityAction implements PrivilegedAction<Object> {
@@ -193,15 +179,44 @@ class AnnotationEventHandlerInvoker {
         }
     }
 
-    private static class MostSuitableEventHandlerCallback implements ReflectionUtils.MethodCallback {
+    /**
+     * MethodCallback and MethodFilter implementation that finds the most suitable event handler method for an event of
+     * given type.
+     * <p/>
+     * Note that this callback must used both as MethodCallback and MethodCallback.
+     * <p/>
+     * Example:<br/> <code>MostSuitableEventHandlerCallback callback = new MostSuitableEventHandlerCallback(eventType)<br/>
+     * ReflectionUtils.doWithMethods(eventListenerClass, callback, callback);</code>
+     */
+    private static class MostSuitableEventHandlerCallback
+            implements ReflectionUtils.MethodCallback, ReflectionUtils.MethodFilter {
 
         private final Class<? extends DomainEvent> eventClass;
-        private final AtomicReference<Method> bestMethodSoFar;
+        private Method bestMethodSoFar;
 
-        public MostSuitableEventHandlerCallback(Class<? extends DomainEvent> eventClass,
-                                                AtomicReference<Method> bestMethodSoFar) {
+        /**
+         * Initialize this callback for the given event class. The callback will find the most suitable method for an
+         * event of given type.
+         *
+         * @param eventClass The type of event to find the handler for
+         */
+        public MostSuitableEventHandlerCallback(Class<? extends DomainEvent> eventClass) {
             this.eventClass = eventClass;
-            this.bestMethodSoFar = bestMethodSoFar;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean matches(Method method) {
+            Method foundSoFar = bestMethodSoFar;
+            Class<?> classUnderInvestigation = method.getDeclaringClass();
+            boolean bestInClassFound =
+                    foundSoFar != null
+                            && !classUnderInvestigation.equals(foundSoFar.getDeclaringClass())
+                            && classUnderInvestigation.isAssignableFrom(foundSoFar.getDeclaringClass());
+            return !bestInClassFound && method.isAnnotationPresent(EventHandler.class)
+                    && method.getParameterTypes()[0].isAssignableFrom(eventClass);
         }
 
         /**
@@ -209,19 +224,20 @@ class AnnotationEventHandlerInvoker {
          */
         @Override
         public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-            if (method.isAnnotationPresent(EventHandler.class)
-                    && method.getParameterTypes()[0].isAssignableFrom(eventClass)) {
-                // method is eligible, but is it the best?
-                if (bestMethodSoFar.get() == null) {
-                    // if we have none yet, this one is the best
-                    bestMethodSoFar.set(method);
-                } else if (bestMethodSoFar.get().getDeclaringClass().equals(method.getDeclaringClass())
-                        && bestMethodSoFar.get().getParameterTypes()[0].isAssignableFrom(
-                        method.getParameterTypes()[0])) {
-                    // this one is more specific, so it wins
-                    bestMethodSoFar.set(method);
-                }
+            // method is eligible, but is it the best?
+            if (bestMethodSoFar == null) {
+                // if we have none yet, this one is the best
+                bestMethodSoFar = method;
+            } else if (bestMethodSoFar.getDeclaringClass().equals(method.getDeclaringClass())
+                    && bestMethodSoFar.getParameterTypes()[0].isAssignableFrom(
+                    method.getParameterTypes()[0])) {
+                // this one is more specific, so it wins
+                bestMethodSoFar = method;
             }
+        }
+
+        public Method foundHandler() {
+            return bestMethodSoFar;
         }
     }
 }
