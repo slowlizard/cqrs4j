@@ -166,15 +166,23 @@ class AnnotationEventHandlerInvoker {
 
     private static class PrivilegedAccessibilityAction implements PrivilegedAction<Object> {
 
-        private final Method m;
+        private final Method method;
 
-        public PrivilegedAccessibilityAction(Method m) {
-            this.m = m;
+        /**
+         * Initialize a new privileged action to make given method accessible
+         *
+         * @param method The method to make accessible
+         */
+        public PrivilegedAccessibilityAction(Method method) {
+            this.method = method;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public Object run() {
-            m.setAccessible(true);
+            method.setAccessible(true);
             return Void.class;
         }
     }
@@ -236,6 +244,11 @@ class AnnotationEventHandlerInvoker {
             }
         }
 
+        /**
+         * Returns the event handler suitable for the given event, or null if no suitable event handler could be found.
+         *
+         * @return the found event handler, or null if none could be found
+         */
         public Method foundHandler() {
             return bestMethodSoFar;
         }
