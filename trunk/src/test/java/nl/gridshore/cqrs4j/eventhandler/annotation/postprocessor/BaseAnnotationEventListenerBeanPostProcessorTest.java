@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import nl.gridshore.cqrs4j.eventhandler.EventListener;
 import nl.gridshore.cqrs4j.eventhandler.annotation.AnnotationEventListenerAdapter;
 import nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler;
 import org.junit.*;
-import org.springframework.context.ApplicationContext;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -38,20 +37,17 @@ public class BaseAnnotationEventListenerBeanPostProcessorTest {
 
     private BaseAnnotationEventListenerBeanPostProcessor testSubject;
     private EventBus mockEventBus;
-    private ApplicationContext mockApplicationContext;
 
     @Before
     public void setUp() {
         mockAdapter = mock(AnnotationEventListenerAdapter.class);
         mockEventBus = mock(EventBus.class);
-        mockApplicationContext = mock(ApplicationContext.class);
         testSubject = new BaseAnnotationEventListenerBeanPostProcessor() {
             @Override
             protected AnnotationEventListenerAdapter adapt(Object bean) {
                 return mockAdapter;
             }
         };
-        testSubject.setApplicationContext(mockApplicationContext);
         testSubject.setEventBus(mockEventBus);
     }
 
@@ -83,14 +79,13 @@ public class BaseAnnotationEventListenerBeanPostProcessorTest {
         Object postProcessedBean = testSubject.postProcessAfterInitialization(result1, "beanName");
 
         verify(mockAdapter).setEventBus(mockEventBus);
-        verify(mockAdapter).setApplicationContext(mockApplicationContext);
-        verify(mockAdapter).afterPropertiesSet();
+        verify(mockAdapter).initialize();
 
-        verify(mockAdapter, never()).destroy();
+        verify(mockAdapter, never()).shutdown();
 
         testSubject.postProcessBeforeDestruction(postProcessedBean, "beanName");
 
-        verify(mockAdapter).destroy();
+        verify(mockAdapter).shutdown();
     }
 
     public static class AnnotatedEventListener {

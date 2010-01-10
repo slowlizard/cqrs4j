@@ -81,8 +81,8 @@ public class BufferingAnnotationEventListenerAdapter extends AnnotationEventList
      * {@inheritDoc}
      */
     @Override
-    public void destroy() throws Exception {
-        super.destroy();
+    public void shutdown() throws Exception {
+        super.shutdown();
         running.set(false);
         // force the thread to wait until the last event is processed
         runningTask.get();
@@ -92,8 +92,8 @@ public class BufferingAnnotationEventListenerAdapter extends AnnotationEventList
      * {@inheritDoc}
      */
     @Override
-    public void afterPropertiesSet() throws Exception {
-        super.afterPropertiesSet();
+    public void initialize() throws Exception {
+        super.initialize();
         if (executor == null) {
             executor = new SimpleAsyncTaskExecutor(getClass().getSimpleName() + "-");
         }
