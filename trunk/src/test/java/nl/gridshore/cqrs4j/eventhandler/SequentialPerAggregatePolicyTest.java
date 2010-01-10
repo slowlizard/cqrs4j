@@ -26,16 +26,16 @@ import static org.junit.Assert.*;
 /**
  * @author Allard Buijze
  */
-public class SerializedPerAggregatePolicyTest {
+public class SequentialPerAggregatePolicyTest {
 
     @Test
-    public void testSerializationIdentifier() {
+    public void testSequentialIdentifier() {
         // ok, pretty useless, but everything should be tested
-        SerializedPerAggregatePolicy testSubject = new SerializedPerAggregatePolicy();
+        SequentialPerAggregatePolicy testSubject = new SequentialPerAggregatePolicy();
         UUID aggregateIdentifier = UUID.randomUUID();
-        Object id1 = testSubject.getSerializationIdentifierFor(new StubDomainEvent(aggregateIdentifier));
-        Object id2 = testSubject.getSerializationIdentifierFor(new StubDomainEvent(aggregateIdentifier));
-        Object id3 = testSubject.getSerializationIdentifierFor(new StubDomainEvent(UUID.randomUUID()));
+        Object id1 = testSubject.getSequenceIdentifierFor(new StubDomainEvent(aggregateIdentifier));
+        Object id2 = testSubject.getSequenceIdentifierFor(new StubDomainEvent(aggregateIdentifier));
+        Object id3 = testSubject.getSequenceIdentifierFor(new StubDomainEvent(UUID.randomUUID()));
 
         assertEquals(id1, id2);
         assertFalse(id1.equals(id3));

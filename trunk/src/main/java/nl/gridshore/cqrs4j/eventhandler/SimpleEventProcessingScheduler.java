@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
- * The EventProcessingScheduler is responsible for scheduling all events within the same SerializationIdentifier in an
+ * The EventProcessingScheduler is responsible for scheduling all events within the same SequencingIdentifier in an
  * ExecutorService. It will only handle events that were present in the queue at the moment processing started. Any
  * events added later will be rescheduled automatically.
  *

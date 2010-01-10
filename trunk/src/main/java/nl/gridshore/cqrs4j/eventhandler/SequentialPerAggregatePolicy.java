@@ -19,19 +19,19 @@ package nl.gridshore.cqrs4j.eventhandler;
 import nl.gridshore.cqrs4j.DomainEvent;
 
 /**
- * Concurrency policy that requires serialized processing of events raised by the same aggregate. Events from different
+ * Concurrency policy that requires sequential processing of events raised by the same aggregate. Events from different
  * aggregates may be processed in different threads.
  *
  * @author Allard Buijze
  * @since 0.3
  */
-public class SerializedPerAggregatePolicy implements EventHandlingSerializationPolicy {
+public class SequentialPerAggregatePolicy implements EventSequencingPolicy {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Object getSerializationIdentifierFor(DomainEvent event) {
+    public Object getSequenceIdentifierFor(DomainEvent event) {
         return event.getAggregateIdentifier();
     }
 }

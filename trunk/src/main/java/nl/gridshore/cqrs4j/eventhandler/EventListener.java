@@ -48,9 +48,10 @@ public interface EventListener {
     void handle(DomainEvent event);
 
     /**
-     * The Event Handling serialization policy applicable to this event listener.
+     * The Event sequencing policy applicable to this event listener. This policy defines which Events must be processed
+     * sequentially, and which may run in parallel.
      *
-     * @return the Event Handling serialization policy applicable to this event listener
+     * @return the Event sequencing policy applicable to this event listener
      */
-    EventHandlingSerializationPolicy getEventHandlingSerializationPolicy();
+    EventSequencingPolicy getEventSequencingPolicy();
 }

@@ -19,18 +19,18 @@ package nl.gridshore.cqrs4j.eventhandler;
 import nl.gridshore.cqrs4j.DomainEvent;
 
 /**
- * SerializationPolicy that does not enforce any serialization requirements on event processing.
+ * EventSequencingPolicy that does not enforce any sequencing requirements on event processing.
  *
  * @author Allard Buijze
  * @since 0.3
  */
-public class FullConcurrencyPolicy implements EventHandlingSerializationPolicy {
+public class FullConcurrencyPolicy implements EventSequencingPolicy {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Object getSerializationIdentifierFor(DomainEvent event) {
+    public Object getSequenceIdentifierFor(DomainEvent event) {
         return null;
     }
 }

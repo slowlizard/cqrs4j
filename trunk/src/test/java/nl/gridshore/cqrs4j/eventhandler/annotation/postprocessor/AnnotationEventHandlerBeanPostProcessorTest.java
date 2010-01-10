@@ -19,9 +19,9 @@ package nl.gridshore.cqrs4j.eventhandler.annotation.postprocessor;
 import net.sf.cglib.proxy.Enhancer;
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
-import nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy;
 import nl.gridshore.cqrs4j.eventhandler.EventListener;
-import nl.gridshore.cqrs4j.eventhandler.FullySerializedPolicy;
+import nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy;
+import nl.gridshore.cqrs4j.eventhandler.SequentialPolicy;
 import nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler;
 import org.junit.*;
 import org.springframework.context.ApplicationContext;
@@ -93,8 +93,8 @@ public class AnnotationEventHandlerBeanPostProcessorTest {
         }
 
         @Override
-        public EventHandlingSerializationPolicy getEventHandlingSerializationPolicy() {
-            return new FullySerializedPolicy();
+        public EventSequencingPolicy getEventSequencingPolicy() {
+            return new SequentialPolicy();
         }
     }
 }

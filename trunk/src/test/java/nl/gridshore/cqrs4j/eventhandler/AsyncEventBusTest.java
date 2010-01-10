@@ -57,7 +57,7 @@ public class AsyncEventBusTest {
     public void testDispatchEvent() {
         EventListener mockEventListener = mock(EventListener.class);
         when(mockEventListener.canHandle(StubDomainEvent.class)).thenReturn(true);
-        when(mockEventListener.getEventHandlingSerializationPolicy()).thenReturn(new SerializedPerAggregatePolicy());
+        when(mockEventListener.getEventSequencingPolicy()).thenReturn(new SequentialPerAggregatePolicy());
         testSubject.subscribe(mockEventListener);
         testSubject.publish(new StubDomainEvent());
 

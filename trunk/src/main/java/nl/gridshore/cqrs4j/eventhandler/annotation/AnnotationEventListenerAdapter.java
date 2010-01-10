@@ -18,9 +18,9 @@ package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
-import nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy;
 import nl.gridshore.cqrs4j.eventhandler.EventListener;
-import nl.gridshore.cqrs4j.eventhandler.FullySerializedPolicy;
+import nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy;
+import nl.gridshore.cqrs4j.eventhandler.SequentialPolicy;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -47,7 +47,7 @@ public class AnnotationEventListenerAdapter
     private ApplicationContext applicationContext;
     private final Object target;
     private final AnnotationEventHandlerInvoker eventHandlerInvoker;
-    private final EventHandlingSerializationPolicy eventHandlingSerializationPolicy;
+    private final EventSequencingPolicy eventSequencingPolicy;
 
     /**
      * Initialize the AnnotationEventListenerAdapter for the given <code>annotatedEventListener</code>.
@@ -56,7 +56,7 @@ public class AnnotationEventListenerAdapter
      */
     public AnnotationEventListenerAdapter(Object annotatedEventListener) {
         eventHandlerInvoker = new AnnotationEventHandlerInvoker(annotatedEventListener);
-        eventHandlingSerializationPolicy = getSerializationPolicyFor(annotatedEventListener);
+        eventSequencingPolicy = getSequencingPolicyFor(annotatedEventListener);
         this.target = annotatedEventListener;
     }
 
@@ -80,8 +80,8 @@ public class AnnotationEventListenerAdapter
      * {@inheritDoc}
      */
     @Override
-    public EventHandlingSerializationPolicy getEventHandlingSerializationPolicy() {
-        return eventHandlingSerializationPolicy;
+    public EventSequencingPolicy getEventSequencingPolicy() {
+        return eventSequencingPolicy;
     }
 
     /**
@@ -116,14 +116,14 @@ public class AnnotationEventListenerAdapter
         eventBus.subscribe(this);
     }
 
-    private EventHandlingSerializationPolicy getSerializationPolicyFor(Object annotatedEventListener) {
+    private EventSequencingPolicy getSequencingPolicyFor(Object annotatedEventListener) {
         ConcurrentEventListener annotation = AnnotationUtils.findAnnotation(annotatedEventListener.getClass(),
                                                                             ConcurrentEventListener.class);
         if (annotation == null) {
-            return new FullySerializedPolicy();
+            return new SequentialPolicy();
         }
 
-        Class<? extends EventHandlingSerializationPolicy> policyClass = annotation.policyClass();
+        Class<? extends EventSequencingPolicy> policyClass = annotation.sequencingPolicyClass();
         try {
             return policyClass.newInstance();
         } catch (InstantiationException e) {

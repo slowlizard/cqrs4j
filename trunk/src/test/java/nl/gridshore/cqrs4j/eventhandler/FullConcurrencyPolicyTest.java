@@ -29,11 +29,11 @@ import static org.junit.Assert.*;
 public class FullConcurrencyPolicyTest {
 
     @Test
-    public void testSerializationIdentifier() {
+    public void testSequencingIdentifier() {
         // ok, pretty useless, but everything should be tested
         FullConcurrencyPolicy testSubject = new FullConcurrencyPolicy();
-        assertNull(testSubject.getSerializationIdentifierFor(new StubDomainEvent(UUID.randomUUID())));
-        assertNull(testSubject.getSerializationIdentifierFor(new StubDomainEvent(UUID.randomUUID())));
-        assertNull(testSubject.getSerializationIdentifierFor(new StubDomainEvent(UUID.randomUUID())));
+        assertNull(testSubject.getSequenceIdentifierFor(new StubDomainEvent(UUID.randomUUID())));
+        assertNull(testSubject.getSequenceIdentifierFor(new StubDomainEvent(UUID.randomUUID())));
+        assertNull(testSubject.getSequenceIdentifierFor(new StubDomainEvent(UUID.randomUUID())));
     }
 }

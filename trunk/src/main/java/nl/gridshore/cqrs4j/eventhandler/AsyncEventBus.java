@@ -29,11 +29,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * EventBus implementation that uses an ExecutorService to dispatch events asynchronously. This dispatcher takes into
- * account the {@link EventHandlingSerializationPolicy} provided by the {@link EventListener} for serialization
- * requirements of event handling.
+ * account the {@link EventSequencingPolicy} provided by the {@link EventListener} for sequential handling
+ * requirements.
  *
  * @author Allard Buijze
- * @see EventHandlingSerializationPolicy
+ * @see EventSequencingPolicy
  * @see nl.gridshore.cqrs4j.eventhandler.EventListener
  * @since 0.3
  */
@@ -45,16 +45,16 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
     private final static TimeUnit DEFAULT_TIME_UNIT = TimeUnit.MINUTES;
 
     private ExecutorService executorService;
-    private final ConcurrentMap<EventListener, EventHandlingSerializationManager> listenerManagers =
-            new ConcurrentHashMap<EventListener, EventHandlingSerializationManager>();
+    private final ConcurrentMap<EventListener, EventHandlingSequenceManager> listenerManagers =
+            new ConcurrentHashMap<EventListener, EventHandlingSequenceManager>();
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void publish(DomainEvent event) {
-        for (EventHandlingSerializationManager eventHandlingSerialization : listenerManagers.values()) {
-            eventHandlingSerialization.addEvent(event);
+        for (EventHandlingSequenceManager eventHandlingSequencing : listenerManagers.values()) {
+            eventHandlingSequencing.addEvent(event);
         }
     }
 
@@ -64,7 +64,7 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
     @Override
     public void subscribe(EventListener eventListener) {
         if (!listenerManagers.containsKey(eventListener)) {
-            listenerManagers.putIfAbsent(eventListener, newEventHandlingSerializationManager(eventListener));
+            listenerManagers.putIfAbsent(eventListener, newEventHandlingSequenceManager(eventListener));
         }
     }
 
@@ -104,13 +104,13 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
     }
 
     /**
-     * Creates a new EventHandlingSerializationManager for the given event listener.
+     * Creates a new EventHandlingSequenceManager for the given event listener.
      *
-     * @param eventListener The event listener that the EventHandlingSerializationManager should manage
-     * @return a new EventHandlingSerializationManager instance
+     * @param eventListener The event listener that the EventHandlingSequenceManager should manage
+     * @return a new EventHandlingSequenceManager instance
      */
-    protected EventHandlingSerializationManager newEventHandlingSerializationManager(EventListener eventListener) {
-        return new EventHandlingSerializationManager(eventListener, getExecutorService());
+    protected EventHandlingSequenceManager newEventHandlingSequenceManager(EventListener eventListener) {
+        return new EventHandlingSequenceManager(eventListener, getExecutorService());
     }
 
     /**
