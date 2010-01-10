@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009. Gridshore
+ * Copyright (c) 2010. Gridshore
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
         if (managedAdapters.containsKey(beanName)) {
             try {
-                managedAdapters.get(beanName).destroy();
+                managedAdapters.get(beanName).shutdown();
             } catch (Exception e) {
                 logger.error("An exception occurred while shutting down an AnnotationAdapter.", e);
             } finally {
@@ -95,10 +95,9 @@ public abstract class BaseAnnotationEventListenerBeanPostProcessor
      */
     private AnnotationEventListenerAdapter initializeAdapterFor(Object bean) {
         AnnotationEventListenerAdapter adapter = adapt(bean);
-        adapter.setApplicationContext(applicationContext);
         adapter.setEventBus(eventBus);
         try {
-            adapter.afterPropertiesSet();
+            adapter.initialize();
         } catch (Exception e) {
             String message = String.format("An error occurred while wrapping an event listener: [%s]",
                                            bean.getClass().getSimpleName());

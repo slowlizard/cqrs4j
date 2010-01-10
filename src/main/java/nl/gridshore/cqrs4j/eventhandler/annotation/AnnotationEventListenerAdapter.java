@@ -21,12 +21,10 @@ import nl.gridshore.cqrs4j.eventhandler.EventBus;
 import nl.gridshore.cqrs4j.eventhandler.EventListener;
 import nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy;
 import nl.gridshore.cqrs4j.eventhandler.SequentialPolicy;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 /**
  * Adapter that turns any bean with {@link nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler} annotated methods
@@ -39,12 +37,10 @@ import org.springframework.core.annotation.AnnotationUtils;
  * @author Allard Buijze
  * @since 0.1
  */
-public class AnnotationEventListenerAdapter
-        implements EventListener, ApplicationContextAware, InitializingBean, DisposableBean {
+public class AnnotationEventListenerAdapter implements EventListener {
 
     private EventBus eventBus;
 
-    private ApplicationContext applicationContext;
     private final Object target;
     private final AnnotationEventHandlerInvoker eventHandlerInvoker;
     private final EventSequencingPolicy eventSequencingPolicy;
@@ -98,8 +94,8 @@ public class AnnotationEventListenerAdapter
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void shutdown() throws Exception {
         if (eventBus != null) {
             eventBus.unsubscribe(this);
         }
@@ -108,11 +104,8 @@ public class AnnotationEventListenerAdapter
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        if (eventBus == null) {
-            eventBus = applicationContext.getBean(EventBus.class);
-        }
+    @PostConstruct
+    public void initialize() throws Exception {
         eventBus.subscribe(this);
     }
 
@@ -146,14 +139,6 @@ public class AnnotationEventListenerAdapter
      */
     public Object getTarget() {
         return target;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
     }
 
     /**

@@ -17,9 +17,9 @@
 package nl.gridshore.cqrs4j.eventhandler;
 
 import nl.gridshore.cqrs4j.DomainEvent;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @see nl.gridshore.cqrs4j.eventhandler.EventListener
  * @since 0.3
  */
-public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean {
+public class AsyncEventBus implements EventBus {
 
     private final static int DEFAULT_CORE_POOL_SIZE = 5;
     private final static int DEFAULT_MAX_POOL_SIZE = 25;
@@ -47,6 +47,7 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
     private ExecutorService executorService;
     private final ConcurrentMap<EventListener, EventHandlingSequenceManager> listenerManagers =
             new ConcurrentHashMap<EventListener, EventHandlingSequenceManager>();
+    private boolean stopExecutorServiceOnShutdown = false;
 
     /**
      * {@inheritDoc}
@@ -82,9 +83,10 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
      * <p/>
      * {@inheritDoc}
      */
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void initialize() throws Exception {
         if (executorService == null) {
+            stopExecutorServiceOnShutdown = true;
             executorService = new ThreadPoolExecutor(DEFAULT_CORE_POOL_SIZE,
                                                      DEFAULT_MAX_POOL_SIZE,
                                                      DEFAULT_KEEP_ALIVE_TIME,
@@ -96,9 +98,9 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
     /**
      * {@inheritDoc}
      */
-    @Override
+    @PreDestroy
     public void destroy() throws Exception {
-        if (executorService != null) {
+        if (executorService != null && stopExecutorServiceOnShutdown) {
             executorService.shutdown();
         }
     }
@@ -133,5 +135,17 @@ public class AsyncEventBus implements EventBus, InitializingBean, DisposableBean
      */
     public void setExecutorService(ExecutorService executorService) {
         this.executorService = executorService;
+    }
+
+    /**
+     * Defines whether or not to shutdown the executor service when the EventBus is stopped. Defaults to
+     * <code>true</code> if the default executor service is used. Defaults to <code>false</code> if a custom executor
+     * service is defined using the {@link #setExecutorService(java.util.concurrent.ExecutorService)} method.
+     *
+     * @param stopExecutorServiceOnShutdown Whether or not to shutdown the executor service when the event bus is
+     *                                      stopped
+     */
+    public void setShutdownExecutorServiceOnShutdown(boolean stopExecutorServiceOnShutdown) {
+        this.stopExecutorServiceOnShutdown = stopExecutorServiceOnShutdown;
     }
 }

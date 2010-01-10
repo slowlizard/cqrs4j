@@ -47,7 +47,7 @@ public class AsyncEventBusTest {
     @Test
     public void testInitialize_Defaults() throws Exception {
         testSubject = new AsyncEventBus();
-        testSubject.afterPropertiesSet();
+        testSubject.initialize();
 
         Object actual = getFieldValue(testSubject, "executorService");
         assertTrue(actual instanceof ThreadPoolExecutor);
@@ -69,7 +69,16 @@ public class AsyncEventBusTest {
     }
 
     @Test
-    public void testExectutorShutdownOnDestroy() throws Exception {
+    public void testExecutorNotShutDownOnDestroy() throws Exception {
+        // the executor must only be shutdown if the event bus created it.
+        testSubject.destroy();
+        verify(mockExecutor, never()).shutdown();
+    }
+
+    @Test
+    public void testExecutorShutDownOnDestroy() throws Exception {
+        // the executor must only be shutdown if the event bus created it.
+        testSubject.setShutdownExecutorServiceOnShutdown(true);
         testSubject.destroy();
         verify(mockExecutor).shutdown();
     }

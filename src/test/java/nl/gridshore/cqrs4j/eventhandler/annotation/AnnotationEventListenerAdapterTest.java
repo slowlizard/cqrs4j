@@ -17,37 +17,17 @@
 package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
-import nl.gridshore.cqrs4j.eventhandler.EventBus;
 import nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy;
 import nl.gridshore.cqrs4j.eventhandler.FullConcurrencyPolicy;
 import nl.gridshore.cqrs4j.eventhandler.SequentialPolicy;
 import org.junit.*;
-import org.springframework.context.ApplicationContext;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * @author Allard Buijze
  */
 public class AnnotationEventListenerAdapterTest {
-
-    @Test
-    public void testEventBusIsAutowired() throws Exception {
-        AnnotatedEventHandler annotatedEventHandler = new AnnotatedEventHandler();
-        AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(annotatedEventHandler);
-        ApplicationContext mockApplicationContext = mock(ApplicationContext.class);
-        adapter.setApplicationContext(mockApplicationContext);
-        EventBus mockEventBus = mock(EventBus.class);
-        when(mockApplicationContext.getBean(EventBus.class)).thenReturn(mockEventBus);
-
-        adapter.afterPropertiesSet();
-
-        verify(mockApplicationContext).getBean(EventBus.class);
-        verify(mockEventBus).subscribe(adapter);
-
-        assertSame(annotatedEventHandler, adapter.getTarget());
-    }
 
     @Test
     public void testHandlingPolicy_Default() throws Exception {

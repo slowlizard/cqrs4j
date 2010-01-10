@@ -33,7 +33,7 @@ public class BufferingAnnotationEventListenerAdapterTest {
     public void testHandlingIsRefusedWhenOnThreadInterrupt() throws Exception {
         BufferingAnnotationEventListenerAdapter testSubject = new BufferingAnnotationEventListenerAdapter(new AnnotatedEventHandler());
         testSubject.setEventBus(mock(EventBus.class));
-        testSubject.afterPropertiesSet();
+        testSubject.initialize();
         Thread.currentThread().interrupt();
 
         try {

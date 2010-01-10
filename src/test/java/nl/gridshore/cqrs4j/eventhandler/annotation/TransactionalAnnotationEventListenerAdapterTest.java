@@ -48,7 +48,7 @@ public class TransactionalAnnotationEventListenerAdapterTest {
         adapter.setTransactionManager(transactionManager);
         adapter.setRetryDelayMillis(1);
         adapter.setEventBus(mock(EventBus.class));
-        adapter.afterPropertiesSet();
+        adapter.initialize();
 
         /*
          * these "marker" events are added to make threading more predictable. The first makes the handler
@@ -67,7 +67,7 @@ public class TransactionalAnnotationEventListenerAdapterTest {
         initializeEvent.latch.countDown();
         shutdownEvent.latch.await();
 
-        adapter.destroy();
+        adapter.shutdown();
 
         // the 3rd invocation failed. Next run had 4 invocations, making 7 in total
         assertEquals(7, eventHandler.invocationCount.get());
