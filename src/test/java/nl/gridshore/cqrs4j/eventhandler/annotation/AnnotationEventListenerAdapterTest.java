@@ -18,9 +18,9 @@ package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
-import nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy;
+import nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy;
 import nl.gridshore.cqrs4j.eventhandler.FullConcurrencyPolicy;
-import nl.gridshore.cqrs4j.eventhandler.FullySerializedPolicy;
+import nl.gridshore.cqrs4j.eventhandler.SequentialPolicy;
 import org.junit.*;
 import org.springframework.context.ApplicationContext;
 
@@ -54,9 +54,9 @@ public class AnnotationEventListenerAdapterTest {
         AnnotatedEventHandler annotatedEventHandler = new AnnotatedEventHandler();
         AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(annotatedEventHandler);
 
-        EventHandlingSerializationPolicy actualPolicy = adapter.getEventHandlingSerializationPolicy();
+        EventSequencingPolicy actualPolicy = adapter.getEventSequencingPolicy();
 
-        assertEquals(FullySerializedPolicy.class, actualPolicy.getClass());
+        assertEquals(SequentialPolicy.class, actualPolicy.getClass());
     }
 
     @Test
@@ -64,7 +64,7 @@ public class AnnotationEventListenerAdapterTest {
         ConcurrentAnnotatedEventHandler annotatedEventHandler = new ConcurrentAnnotatedEventHandler();
         AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(annotatedEventHandler);
 
-        EventHandlingSerializationPolicy actualPolicy = adapter.getEventHandlingSerializationPolicy();
+        EventSequencingPolicy actualPolicy = adapter.getEventSequencingPolicy();
 
         assertEquals(FullConcurrencyPolicy.class, actualPolicy.getClass());
     }
@@ -90,7 +90,7 @@ public class AnnotationEventListenerAdapterTest {
 
     }
 
-    @ConcurrentEventListener(policyClass = FullConcurrencyPolicy.class)
+    @ConcurrentEventListener(sequencingPolicyClass = FullConcurrencyPolicy.class)
     private static class ConcurrentAnnotatedEventHandler {
 
         @EventHandler
@@ -99,7 +99,7 @@ public class AnnotationEventListenerAdapterTest {
 
     }
 
-    @ConcurrentEventListener(policyClass = IllegalConcurrencyPolicy.class)
+    @ConcurrentEventListener(sequencingPolicyClass = IllegalConcurrencyPolicy.class)
     private static class IllegalConcurrentAnnotatedEventHandler {
 
         @EventHandler
@@ -108,14 +108,14 @@ public class AnnotationEventListenerAdapterTest {
 
     }
 
-    private static class IllegalConcurrencyPolicy implements EventHandlingSerializationPolicy {
+    private static class IllegalConcurrencyPolicy implements EventSequencingPolicy {
 
         public IllegalConcurrencyPolicy(String name) {
             // just for the sake of not having a default constructor
         }
 
         @Override
-        public Object getSerializationIdentifierFor(DomainEvent event) {
+        public Object getSequenceIdentifierFor(DomainEvent event) {
             return null;
         }
     }

@@ -19,21 +19,21 @@ package nl.gridshore.cqrs4j.eventhandler;
 import nl.gridshore.cqrs4j.DomainEvent;
 
 /**
- * EventHandlingSerializationPolicy that requires serialized handling of all events delivered to an event handler. This
- * is the default policy for event handlers.
+ * EventSequencingPolicy that requires serialized handling of all events delivered to an event handler. This is the
+ * default policy for event handlers.
  *
  * @author Allard Buijze
  * @since 0.3
  */
-public class FullySerializedPolicy implements EventHandlingSerializationPolicy {
+public class SequentialPolicy implements EventSequencingPolicy {
 
-    private static final Object FULLY_SERIALIZED_POLICY = new Object();
+    private static final Object FULL_SEQUENTIAL_POLICY = new Object();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Object getSerializationIdentifierFor(DomainEvent event) {
-        return FULLY_SERIALIZED_POLICY;
+    public Object getSequenceIdentifierFor(DomainEvent event) {
+        return FULL_SEQUENTIAL_POLICY;
     }
 }

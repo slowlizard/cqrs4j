@@ -16,8 +16,8 @@
 
 package nl.gridshore.cqrs4j.eventhandler.annotation;
 
-import nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy;
-import nl.gridshore.cqrs4j.eventhandler.FullySerializedPolicy;
+import nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy;
+import nl.gridshore.cqrs4j.eventhandler.SequentialPolicy;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -30,9 +30,9 @@ import java.lang.annotation.Target;
  * definition of the concurrency policy for this EventListener. The default values of this annotations will provide the
  * exact same behavior as the omission of the entire annotation, albeit less explicit.
  * <p/>
- * This annotation allows the configuration of any {@link #policyClass() arbitrary class}, as long as it implements the
- * {@link nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy} interface. It also needs to have (at least)
- * a no-arg constructor.
+ * This annotation allows the configuration of any {@link #sequencingPolicyClass() arbitrary class}, as long as it
+ * implements the {@link nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy} interface. It also needs to have (at
+ * least) a no-arg constructor.
  *
  * @author Allard Buijze
  * @since 0.3
@@ -43,9 +43,9 @@ import java.lang.annotation.Target;
 public @interface ConcurrentEventListener {
 
     /**
-     * Defines the policy type to use for event handling serialization. The provided class must implement {@link
-     * nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy} and provide an accessible no-arg constructor.
+     * Defines the policy type to use for event handling sequencing. The provided class must implement {@link
+     * nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy} and provide an accessible no-arg constructor.
      */
-    Class<? extends EventHandlingSerializationPolicy> policyClass() default FullySerializedPolicy.class;
+    Class<? extends EventSequencingPolicy> sequencingPolicyClass() default SequentialPolicy.class;
 
 }

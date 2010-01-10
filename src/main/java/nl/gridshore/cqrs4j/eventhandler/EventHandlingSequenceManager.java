@@ -23,31 +23,31 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 
 /**
- * The EventHandlingSerializationManager is responsible for delegating each incoming event to the relevant {@link
- * EventProcessingScheduler} for processing, depending on the serialization identifier of the event.
+ * The EventHandlingSequenceManager is responsible for delegating each incoming event to the relevant {@link
+ * EventProcessingScheduler} for processing, depending on the sequencing identifier of the event.
  *
  * @author Allard Buijze
  * @since 0.3
  */
-public class EventHandlingSerializationManager {
+public class EventHandlingSequenceManager {
 
     private final EventListener eventListener;
     private final ExecutorService executorService;
     private final ConcurrentMap<Object, EventProcessingScheduler> transactions =
             new ConcurrentHashMap<Object, EventProcessingScheduler>();
-    private final EventHandlingSerializationPolicy eventHandlingSerializationPolicy;
+    private final EventSequencingPolicy eventSequencingPolicy;
 
     /**
-     * Initialize the EventHandlingSerializationManager for the given <code>eventListener</code> using the given
+     * Initialize the EventHandlingSequenceManager for the given <code>eventListener</code> using the given
      * <code>executorService</code>.
      *
      * @param eventListener   The event listener this instance manages
      * @param executorService The executorService that processes the events
      */
-    public EventHandlingSerializationManager(EventListener eventListener, ExecutorService executorService) {
+    public EventHandlingSequenceManager(EventListener eventListener, ExecutorService executorService) {
         this.eventListener = eventListener;
         this.executorService = executorService;
-        this.eventHandlingSerializationPolicy = eventListener.getEventHandlingSerializationPolicy();
+        this.eventSequencingPolicy = eventListener.getEventSequencingPolicy();
     }
 
     /**
@@ -57,7 +57,7 @@ public class EventHandlingSerializationManager {
      */
     public void addEvent(DomainEvent event) {
         if (eventListener.canHandle(event.getClass())) {
-            final Object policy = eventHandlingSerializationPolicy.getSerializationIdentifierFor(event);
+            final Object policy = eventSequencingPolicy.getSequenceIdentifierFor(event);
             if (policy == null) {
                 executorService.submit(new EventInvocationTask(eventListener, event));
             } else {

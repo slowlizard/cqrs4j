@@ -38,7 +38,7 @@ import static org.junit.Assert.*;
  */
 public class ListenerManagerTest {
 
-    private EventHandlingSerializationManager testSubject;
+    private EventHandlingSequenceManager testSubject;
     private StubEventListener mockEventListener;
     private ExecutorService executorService;
 
@@ -46,7 +46,7 @@ public class ListenerManagerTest {
     public void setUp() {
         mockEventListener = new StubEventListener();
         executorService = new ThreadPoolExecutor(25, 100, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());
-        testSubject = new EventHandlingSerializationManager(mockEventListener, executorService);
+        testSubject = new EventHandlingSequenceManager(mockEventListener, executorService);
     }
 
     @Test
@@ -128,8 +128,8 @@ public class ListenerManagerTest {
         }
 
         @Override
-        public EventHandlingSerializationPolicy getEventHandlingSerializationPolicy() {
-            return new SerializedPerAggregatePolicy();
+        public EventSequencingPolicy getEventSequencingPolicy() {
+            return new SequentialPerAggregatePolicy();
         }
     }
 

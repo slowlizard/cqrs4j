@@ -26,15 +26,15 @@ import static org.junit.Assert.*;
 /**
  * @author Allard Buijze
  */
-public class FullySerializedPolicyTest {
+public class SequentialPolicyTest {
 
     @Test
-    public void testSerializationIdentifier() {
+    public void testSequencingIdentifier() {
         // ok, pretty useless, but everything should be tested
-        FullySerializedPolicy testSubject = new FullySerializedPolicy();
-        Object id1 = testSubject.getSerializationIdentifierFor(new StubDomainEvent(UUID.randomUUID()));
-        Object id2 = testSubject.getSerializationIdentifierFor(new StubDomainEvent(UUID.randomUUID()));
-        Object id3 = testSubject.getSerializationIdentifierFor(new StubDomainEvent(UUID.randomUUID()));
+        SequentialPolicy testSubject = new SequentialPolicy();
+        Object id1 = testSubject.getSequenceIdentifierFor(new StubDomainEvent(UUID.randomUUID()));
+        Object id2 = testSubject.getSequenceIdentifierFor(new StubDomainEvent(UUID.randomUUID()));
+        Object id3 = testSubject.getSequenceIdentifierFor(new StubDomainEvent(UUID.randomUUID()));
 
         assertEquals(id1, id2);
         assertEquals(id2, id3);

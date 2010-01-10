@@ -17,8 +17,8 @@
 package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 /**
- * Exception indicating that a given {@link nl.gridshore.cqrs4j.eventhandler.EventHandlingSerializationPolicy} could not
- * be initialized.
+ * Exception indicating that a given {@link nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy} could not be
+ * initialized.
  *
  * @author Allard Buijze
  * @since 0.3
