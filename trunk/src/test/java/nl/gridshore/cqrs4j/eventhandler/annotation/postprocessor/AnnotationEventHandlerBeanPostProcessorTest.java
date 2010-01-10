@@ -34,13 +34,13 @@ import static org.mockito.Mockito.*;
  */
 public class AnnotationEventHandlerBeanPostProcessorTest {
 
-    private BufferingAnnotationEventListenerBeanPostProcessor testSubject;
+    private AnnotationEventListenerBeanPostProcessor testSubject;
     private ApplicationContext mockApplicationContext;
     private EventBus mockEventBus;
 
     @Before
     public void setUp() {
-        testSubject = spy(new BufferingAnnotationEventListenerBeanPostProcessor());
+        testSubject = spy(new AnnotationEventListenerBeanPostProcessor());
         mockApplicationContext = mock(ApplicationContext.class);
         testSubject.setApplicationContext(mockApplicationContext);
         mockEventBus = mock(EventBus.class);
