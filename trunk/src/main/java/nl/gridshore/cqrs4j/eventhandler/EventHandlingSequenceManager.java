@@ -59,7 +59,7 @@ public class EventHandlingSequenceManager {
         if (eventListener.canHandle(event.getClass())) {
             final Object policy = eventSequencingPolicy.getSequenceIdentifierFor(event);
             if (policy == null) {
-                executorService.submit(new EventInvocationTask(eventListener, event));
+                executorService.submit(new SingleEventHandlerInvocationTask(eventListener, event));
             } else {
                 if (!transactions.containsKey(policy)) {
                     transactions.putIfAbsent(policy, newProcessingScheduler());
@@ -76,24 +76,32 @@ public class EventHandlingSequenceManager {
      * @return a new scheduler instance
      */
     protected EventProcessingScheduler newProcessingScheduler() {
-        return new SimpleEventProcessingScheduler(getEventListener(), getExecutorService());
+        return new EventProcessingScheduler(eventListener, executorService);
     }
 
-    /**
-     * Returns the event listener for which this manager manages event handler invocations.
-     *
-     * @return the event listener for which this manager manages event handler invocations.
-     */
-    protected EventListener getEventListener() {
-        return eventListener;
-    }
+    private static class SingleEventHandlerInvocationTask implements Runnable {
 
-    /**
-     * Returns the executor service that peforms the actual event handler invocations
-     *
-     * @return the executor service that peforms the actual event handler invocations
-     */
-    protected ExecutorService getExecutorService() {
-        return executorService;
+        private final EventListener eventListener;
+        private final DomainEvent event;
+
+        /**
+         * Configures a task to invoke a single event on an event listener
+         *
+         * @param eventListener The event listener to invoke the event handler on
+         * @param event         the event to send to the event listener
+         */
+        public SingleEventHandlerInvocationTask(
+                EventListener eventListener, DomainEvent event) {
+            this.eventListener = eventListener;
+            this.event = event;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void run() {
+            eventListener.handle(event);
+        }
     }
 }

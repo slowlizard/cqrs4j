@@ -128,7 +128,7 @@ public class AnnotationEventHandlerInvokerTest {
         testSubject = new AnnotationEventHandlerInvoker(handler);
         nl.gridshore.cqrs4j.eventhandler.annotation.EventHandler configuration = testSubject
                 .findEventHandlerConfiguration(new StubEventOne());
-        assertEquals(2, configuration.commitThreshold());
+        assertNotNull(configuration);
 
         // if no method is found, null is returned
         assertNull(testSubject.findEventHandlerConfiguration(new DomainEvent() {
@@ -160,7 +160,7 @@ public class AnnotationEventHandlerInvokerTest {
 
         protected int invocationCount3;
 
-        @EventHandler(commitThreshold = 2)
+        @EventHandler
         public void method3(StubEventOne event) {
             invocationCount3++;
         }

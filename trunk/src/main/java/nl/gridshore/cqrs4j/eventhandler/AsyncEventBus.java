@@ -17,6 +17,7 @@
 package nl.gridshore.cqrs4j.eventhandler;
 
 import nl.gridshore.cqrs4j.DomainEvent;
+import nl.gridshore.cqrs4j.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -26,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * EventBus implementation that uses an ExecutorService to dispatch events asynchronously. This dispatcher takes into
@@ -47,13 +49,15 @@ public class AsyncEventBus implements EventBus {
     private ExecutorService executorService;
     private final ConcurrentMap<EventListener, EventHandlingSequenceManager> listenerManagers =
             new ConcurrentHashMap<EventListener, EventHandlingSequenceManager>();
-    private boolean stopExecutorServiceOnShutdown = false;
+    private boolean shutdownExecutorServiceOnStop = false;
+    private AtomicBoolean running = new AtomicBoolean(false);
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void publish(DomainEvent event) {
+        Assert.state(running.get(), "The EventBus is currently not running.");
         for (EventHandlingSequenceManager eventHandlingSequencing : listenerManagers.values()) {
             eventHandlingSequencing.addEvent(event);
         }
@@ -64,6 +68,7 @@ public class AsyncEventBus implements EventBus {
      */
     @Override
     public void subscribe(EventListener eventListener) {
+        Assert.state(running.get(), "The EventBus is currently not running.");
         if (!listenerManagers.containsKey(eventListener)) {
             listenerManagers.putIfAbsent(eventListener, newEventHandlingSequenceManager(eventListener));
         }
@@ -78,29 +83,32 @@ public class AsyncEventBus implements EventBus {
     }
 
     /**
+     * Starts the EventBus, opening it for incoming subscription requests and events.
+     * <p/>
      * Will configure a default executor service if none has been wired. This method must be called after initialization
      * of all properties.
      * <p/>
      * {@inheritDoc}
      */
     @PostConstruct
-    public void initialize() throws Exception {
+    public void start() {
+        running.set(true);
         if (executorService == null) {
-            stopExecutorServiceOnShutdown = true;
-            executorService = new ThreadPoolExecutor(DEFAULT_CORE_POOL_SIZE,
-                                                     DEFAULT_MAX_POOL_SIZE,
-                                                     DEFAULT_KEEP_ALIVE_TIME,
-                                                     DEFAULT_TIME_UNIT,
+            shutdownExecutorServiceOnStop = true;
+            executorService = new ThreadPoolExecutor(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_POOL_SIZE,
+                                                     DEFAULT_KEEP_ALIVE_TIME, DEFAULT_TIME_UNIT,
                                                      new LinkedBlockingQueue<Runnable>());
         }
     }
 
     /**
-     * {@inheritDoc}
+     * Stops this event bus. All subscriptions are removed and incoming events are rejected.
      */
     @PreDestroy
-    public void destroy() throws Exception {
-        if (executorService != null && stopExecutorServiceOnShutdown) {
+    public void stop() {
+        running.set(false);
+        listenerManagers.clear();
+        if (executorService != null && shutdownExecutorServiceOnStop) {
             executorService.shutdown();
         }
     }
@@ -138,14 +146,14 @@ public class AsyncEventBus implements EventBus {
     }
 
     /**
-     * Defines whether or not to shutdown the executor service when the EventBus is stopped. Defaults to
-     * <code>true</code> if the default executor service is used. Defaults to <code>false</code> if a custom executor
-     * service is defined using the {@link #setExecutorService(java.util.concurrent.ExecutorService)} method.
+     * Defines whether or not to shutdown the executor service when the EventBus is stopped. This value is ignored when
+     * the default ExecutorService is used. Defaults to <code>false</code> if a custom executor service is defined using
+     * the {@link #setExecutorService(java.util.concurrent.ExecutorService)} method.
      *
-     * @param stopExecutorServiceOnShutdown Whether or not to shutdown the executor service when the event bus is
+     * @param shutdownExecutorServiceOnStop Whether or not to shutdown the executor service when the event bus is
      *                                      stopped
      */
-    public void setShutdownExecutorServiceOnShutdown(boolean stopExecutorServiceOnShutdown) {
-        this.stopExecutorServiceOnShutdown = stopExecutorServiceOnShutdown;
+    public void setShutdownExecutorServiceOnStop(boolean shutdownExecutorServiceOnStop) {
+        this.shutdownExecutorServiceOnStop = shutdownExecutorServiceOnStop;
     }
 }

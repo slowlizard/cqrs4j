@@ -47,7 +47,7 @@ public class AsyncEventBusTest {
     @Test
     public void testInitialize_Defaults() throws Exception {
         testSubject = new AsyncEventBus();
-        testSubject.initialize();
+        testSubject.start();
 
         Object actual = getFieldValue(testSubject, "executorService");
         assertTrue(actual instanceof ThreadPoolExecutor);
@@ -55,9 +55,10 @@ public class AsyncEventBusTest {
 
     @Test
     public void testDispatchEvent() {
-        EventListener mockEventListener = mock(EventListener.class);
+        nl.gridshore.cqrs4j.eventhandler.EventListener mockEventListener = mock(nl.gridshore.cqrs4j.eventhandler.EventListener.class);
         when(mockEventListener.canHandle(StubDomainEvent.class)).thenReturn(true);
         when(mockEventListener.getEventSequencingPolicy()).thenReturn(new SequentialPerAggregatePolicy());
+        testSubject.start();
         testSubject.subscribe(mockEventListener);
         testSubject.publish(new StubDomainEvent());
 
@@ -71,15 +72,15 @@ public class AsyncEventBusTest {
     @Test
     public void testExecutorNotShutDownOnDestroy() throws Exception {
         // the executor must only be shutdown if the event bus created it.
-        testSubject.destroy();
+        testSubject.stop();
         verify(mockExecutor, never()).shutdown();
     }
 
     @Test
     public void testExecutorShutDownOnDestroy() throws Exception {
         // the executor must only be shutdown if the event bus created it.
-        testSubject.setShutdownExecutorServiceOnShutdown(true);
-        testSubject.destroy();
+        testSubject.setShutdownExecutorServiceOnStop(true);
+        testSubject.stop();
         verify(mockExecutor).shutdown();
     }
 

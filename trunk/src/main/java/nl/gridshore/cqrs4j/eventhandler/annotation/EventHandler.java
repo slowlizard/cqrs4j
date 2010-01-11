@@ -44,7 +44,6 @@ import java.lang.annotation.Target;
  *
  * @author Allard Buijze
  * @see AnnotationEventListenerAdapter
- * @see TransactionalBufferingAnnotationEventListenerAdapter
  * @since 0.1
  */
 @Documented
@@ -52,17 +51,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface EventHandler {
 
-    /**
-     * The number of event handler calls that may be done in a transaction where the call to this event handler is part
-     * of. Defaults to 50.
-     * <p/>
-     * Setting this value to 1 will force event transaction aware {@link nl.gridshore.cqrs4j.eventhandler.EventListener
-     * event listeners} to execute the annotated method in a separate transaction.
-     * <p/>
-     * Note that this value is ignored by {@link nl.gridshore.cqrs4j.eventhandler.EventListener}s that are unaware of
-     * transactional processing.
-     *
-     * @see BufferingAnnotationEventListenerAdapter
-     */
-    int commitThreshold() default 50;
 }
