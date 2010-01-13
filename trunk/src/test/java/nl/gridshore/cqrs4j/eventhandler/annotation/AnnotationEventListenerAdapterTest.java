@@ -17,17 +17,56 @@
 package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
+import nl.gridshore.cqrs4j.StubDomainEvent;
+import nl.gridshore.cqrs4j.eventhandler.EventBus;
 import nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy;
 import nl.gridshore.cqrs4j.eventhandler.FullConcurrencyPolicy;
 import nl.gridshore.cqrs4j.eventhandler.SequentialPolicy;
 import org.junit.*;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Allard Buijze
  */
 public class AnnotationEventListenerAdapterTest {
+
+    @Test
+    public void testHandlerCorrectlyUsed() {
+        ConcurrentAnnotatedEventHandler annotatedEventHandler = new ConcurrentAnnotatedEventHandler();
+        AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(annotatedEventHandler);
+
+        adapter.beforeTransaction(null);
+        assertEquals(1, annotatedEventHandler.beforeInvoked);
+        assertEquals(0, annotatedEventHandler.eventInvoked);
+        assertEquals(0, annotatedEventHandler.afterInvoked);
+        adapter.handle(new StubDomainEvent());
+        assertEquals(1, annotatedEventHandler.beforeInvoked);
+        assertEquals(1, annotatedEventHandler.eventInvoked);
+        assertEquals(0, annotatedEventHandler.afterInvoked);
+        adapter.afterTransaction(null);
+        assertEquals(1, annotatedEventHandler.beforeInvoked);
+        assertEquals(1, annotatedEventHandler.eventInvoked);
+        assertEquals(1, annotatedEventHandler.afterInvoked);
+
+        assertTrue(adapter.canHandle(StubDomainEvent.class));
+        assertFalse(adapter.canHandle(DomainEvent.class));
+        assertNotNull(adapter.getConfigurationFor(new StubDomainEvent()));
+    }
+
+    @Test
+    public void testAdapterMangegesEventBusSubscription() {
+        ConcurrentAnnotatedEventHandler annotatedEventHandler = new ConcurrentAnnotatedEventHandler();
+        AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter(annotatedEventHandler);
+        EventBus mockEventBus = mock(EventBus.class);
+        adapter.setEventBus(mockEventBus);
+
+        adapter.initialize();
+        verify(mockEventBus).subscribe(adapter);
+        adapter.shutdown();
+        verify(mockEventBus).unsubscribe(adapter);
+    }
 
     @Test
     public void testHandlingPolicy_Default() throws Exception {
@@ -59,7 +98,6 @@ public class AnnotationEventListenerAdapterTest {
         catch (UnsupportedPolicyException e) {
             assertTrue("Incomplete message:" + e.getMessage(), e.getMessage().contains("IllegalConcurrencyPolicy"));
         }
-
     }
 
     private static class AnnotatedEventHandler {
@@ -73,8 +111,23 @@ public class AnnotationEventListenerAdapterTest {
     @ConcurrentEventListener(sequencingPolicyClass = FullConcurrencyPolicy.class)
     private static class ConcurrentAnnotatedEventHandler {
 
+        private int beforeInvoked;
+        private int afterInvoked;
+        private int eventInvoked;
+
+        @BeforeTransaction
+        public void beforeTransaction() {
+            beforeInvoked++;
+        }
+
         @EventHandler
-        public void handleEvent(DomainEvent event) {
+        public void handleEvent(StubDomainEvent event) {
+            eventInvoked++;
+        }
+
+        @AfterTransaction
+        public void afterTransaction() {
+            afterInvoked++;
         }
 
     }

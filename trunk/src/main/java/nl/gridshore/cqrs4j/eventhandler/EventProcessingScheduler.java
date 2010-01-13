@@ -23,6 +23,8 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
+import static nl.gridshore.cqrs4j.eventhandler.YieldPolicy.DO_NOT_YIELD;
+
 /**
  * The EventProcessingScheduler is responsible for scheduling all events within the same SequencingIdentifier in an
  * ExecutorService. It will only handle events that were present in the queue at the moment processing started. Any
@@ -34,6 +36,7 @@ import java.util.concurrent.RejectedExecutionException;
 public class EventProcessingScheduler implements Runnable {
 
     private final EventListener eventListener;
+    private final TransactionAware transactionListener;
     private final ExecutorService executorService;
 
     // guarded by "this"
@@ -49,6 +52,11 @@ public class EventProcessingScheduler implements Runnable {
      */
     public EventProcessingScheduler(EventListener eventListener, ExecutorService executorService) {
         this.eventListener = eventListener;
+        if (eventListener instanceof TransactionAware) {
+            this.transactionListener = (TransactionAware) eventListener;
+        } else {
+            this.transactionListener = new TransactionIgnoreAdapter();
+        }
         this.executorService = executorService;
     }
 
@@ -131,14 +139,43 @@ public class EventProcessingScheduler implements Runnable {
     public void run() {
         DomainEvent event;
         boolean mayContinue = true;
+        final TransactionStatusImpl status = new TransactionStatusImpl(queuedEventCount());
+        TransactionStatus.set(status);
         while (mayContinue) {
-            int transactionSize = 0;
-            final int maxTransactionSize = queuedEventCount();
-            while (transactionSize < maxTransactionSize && (event = nextEvent()) != null) {
+            transactionListener.beforeTransaction(status);
+            while (!status.isTransactionSizeReached() && (event = nextEvent()) != null) {
                 eventListener.handle(event);
-                transactionSize++;
+                status.recordEventProcessed();
             }
-            mayContinue = !yield();
+            transactionListener.afterTransaction(status);
+            mayContinue = DO_NOT_YIELD.equals(status.getYieldPolicy()) || !yield();
+            status.resetTransactionStatus();
         }
+        TransactionStatus.clear();
+    }
+
+    private static class TransactionStatusImpl extends TransactionStatus {
+
+        public TransactionStatusImpl(int transactionSize) {
+            setMaxTransactionSize(transactionSize);
+        }
+    }
+
+    private static class TransactionIgnoreAdapter implements TransactionAware {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void beforeTransaction(TransactionStatus transactionStatus) {
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void afterTransaction(TransactionStatus transactionStatus) {
+        }
+
     }
 }
