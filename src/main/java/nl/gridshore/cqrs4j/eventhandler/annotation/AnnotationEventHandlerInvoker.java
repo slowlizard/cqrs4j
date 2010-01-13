@@ -18,12 +18,15 @@ package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.EventListener;
+import nl.gridshore.cqrs4j.eventhandler.TransactionStatus;
 import org.springframework.util.ReflectionUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.security.AccessController.doPrivileged;
 
@@ -74,10 +77,10 @@ class AnnotationEventHandlerInvoker {
             @Override
             public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                 if (method.isAnnotationPresent(EventHandler.class)) {
-                    if (method.getParameterTypes().length != 1) {
+                    if (method.getParameterTypes().length > 2) {
                         throw new UnsupportedHandlerMethodException(String.format(
-                                "Event Handling class %s contains method %s that has more than one parameter. "
-                                        + "Either remove @EventListener annotation or reduce to a single parameter.",
+                                "Event Handling class %s contains method %s that has more than two parameters. "
+                                        + "Either remove @EventHandler annotation or reduce to one or two parameters.",
                                 method.getDeclaringClass().getSimpleName(),
                                 method.getName()),
                                                                     method);
@@ -88,6 +91,16 @@ class AnnotationEventHandlerInvoker {
                                         + "Parameter must extend from DomainEvent",
                                 method.getDeclaringClass().getSimpleName(),
                                 method.getName()),
+                                                                    method);
+                    }
+                    if (method.getParameterTypes().length == 2 &&
+                            !TransactionStatus.class.equals(method.getParameterTypes()[1])) {
+                        throw new UnsupportedHandlerMethodException(String.format(
+                                "Event Handling class %s contains method %s that has an invalid parameter. "
+                                        + "The (optional) second parameter must be of type: %s",
+                                method.getDeclaringClass().getSimpleName(),
+                                method.getName(),
+                                TransactionStatus.class.getName()),
                                                                     method);
                     }
                     Method[] forbiddenMethods = EventListener.class.getDeclaredMethods();
@@ -122,7 +135,11 @@ class AnnotationEventHandlerInvoker {
             if (!m.isAccessible()) {
                 doPrivileged(new PrivilegedAccessibilityAction(m));
             }
-            m.invoke(target, event);
+            if (m.getParameterTypes().length == 1) {
+                m.invoke(target, event);
+            } else {
+                m.invoke(target, event, TransactionStatus.current());
+            }
         } catch (IllegalAccessException e) {
             throw new UnsupportedOperationException(String.format(
                     "An error occurred when applying an event of type [%s]",
@@ -130,7 +147,7 @@ class AnnotationEventHandlerInvoker {
         } catch (InvocationTargetException e) {
             throw new UnsupportedOperationException(String.format(
                     "An error occurred when applying an event of type [%s]",
-                    event.getClass().getSimpleName()), e.getCause() != null ? e.getCause() : e);
+                    event.getClass().getSimpleName()), e.getCause());
         }
     }
 
@@ -162,6 +179,21 @@ class AnnotationEventHandlerInvoker {
         MostSuitableEventHandlerCallback callback = new MostSuitableEventHandlerCallback(eventClass);
         ReflectionUtils.doWithMethods(target.getClass(), callback, callback);
         return callback.foundHandler();
+    }
+
+    public void invokeBeforeTransaction(TransactionStatus transactionStatus) {
+        invokeTransactionMethod(BeforeTransaction.class, transactionStatus);
+    }
+
+    private void invokeTransactionMethod(Class<? extends Annotation> beforeTransactionClass,
+                                         TransactionStatus transactionStatus) {
+        CallFirstTransactionMethodCallback callback = new CallFirstTransactionMethodCallback(beforeTransactionClass,
+                                                                                             transactionStatus);
+        ReflectionUtils.doWithMethods(target.getClass(), callback, callback);
+    }
+
+    public void invokeAfterTransaction(TransactionStatus transactionStatus) {
+        invokeTransactionMethod(AfterTransaction.class, transactionStatus);
     }
 
     private static class PrivilegedAccessibilityAction implements PrivilegedAction<Object> {
@@ -251,6 +283,44 @@ class AnnotationEventHandlerInvoker {
          */
         public Method foundHandler() {
             return bestMethodSoFar;
+        }
+    }
+
+    private class CallFirstTransactionMethodCallback
+            implements ReflectionUtils.MethodCallback, ReflectionUtils.MethodFilter {
+
+        final AtomicBoolean found = new AtomicBoolean(false);
+        private final Class<? extends Annotation> annotation;
+        private final TransactionStatus transactionStatus;
+
+        public CallFirstTransactionMethodCallback(
+                Class<? extends Annotation> annotation, TransactionStatus transactionStatus) {
+            this.annotation = annotation;
+            this.transactionStatus = transactionStatus;
+        }
+
+        @Override
+        public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+            found.set(true);
+            try {
+                if (method.getParameterTypes().length == 1) {
+                    method.invoke(target, transactionStatus);
+                } else {
+                    method.invoke(target);
+                }
+            } catch (InvocationTargetException e) {
+                throw new TransactionMethodExecutionException(String.format(
+                        "An error occurred while invoking [%s] on [%s].",
+                        method.getName(),
+                        target.getClass().getSimpleName()), e);
+            }
+        }
+
+        @Override
+        public boolean matches(Method method) {
+            return (method.getParameterTypes().length == 0
+                    || method.getParameterTypes()[0].equals(TransactionStatus.class))
+                    && method.isAnnotationPresent(annotation) && !found.get();
         }
     }
 }

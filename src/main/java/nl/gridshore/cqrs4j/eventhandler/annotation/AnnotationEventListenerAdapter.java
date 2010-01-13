@@ -18,9 +18,10 @@ package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.eventhandler.EventBus;
-import nl.gridshore.cqrs4j.eventhandler.EventListener;
 import nl.gridshore.cqrs4j.eventhandler.EventSequencingPolicy;
 import nl.gridshore.cqrs4j.eventhandler.SequentialPolicy;
+import nl.gridshore.cqrs4j.eventhandler.TransactionAware;
+import nl.gridshore.cqrs4j.eventhandler.TransactionStatus;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import javax.annotation.PostConstruct;
@@ -37,13 +38,15 @@ import javax.annotation.PreDestroy;
  * @author Allard Buijze
  * @since 0.1
  */
-public class AnnotationEventListenerAdapter implements EventListener {
+public class AnnotationEventListenerAdapter
+        implements TransactionAware, nl.gridshore.cqrs4j.eventhandler.EventListener {
 
-    private EventBus eventBus;
+    private volatile EventBus eventBus;
 
     private final Object target;
     private final AnnotationEventHandlerInvoker eventHandlerInvoker;
     private final EventSequencingPolicy eventSequencingPolicy;
+    private final TransactionAware transactionListener;
 
     /**
      * Initialize the AnnotationEventListenerAdapter for the given <code>annotatedEventListener</code>.
@@ -54,6 +57,11 @@ public class AnnotationEventListenerAdapter implements EventListener {
         eventHandlerInvoker = new AnnotationEventHandlerInvoker(annotatedEventListener);
         eventSequencingPolicy = getSequencingPolicyFor(annotatedEventListener);
         this.target = annotatedEventListener;
+        if (target instanceof TransactionAware) {
+            transactionListener = (TransactionAware) target;
+        } else {
+            transactionListener = new AnnotatedTransactionAware(eventHandlerInvoker);
+        }
     }
 
     /**
@@ -81,6 +89,22 @@ public class AnnotationEventListenerAdapter implements EventListener {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void beforeTransaction(TransactionStatus transactionStatus) {
+        transactionListener.beforeTransaction(transactionStatus);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void afterTransaction(TransactionStatus transactionStatus) {
+        transactionListener.afterTransaction(transactionStatus);
+    }
+
+    /**
      * Returns the configuration of the event handler that would process the given <code>event</code>. Returns
      * <code>null</code> if no event handler is found for the given event.
      *
@@ -95,7 +119,7 @@ public class AnnotationEventListenerAdapter implements EventListener {
      * {@inheritDoc}
      */
     @PreDestroy
-    public void shutdown() throws Exception {
+    public void shutdown() {
         if (eventBus != null) {
             eventBus.unsubscribe(this);
         }
@@ -105,8 +129,10 @@ public class AnnotationEventListenerAdapter implements EventListener {
      * {@inheritDoc}
      */
     @PostConstruct
-    public void initialize() throws Exception {
-        eventBus.subscribe(this);
+    public void initialize() {
+        if (eventBus != null) {
+            eventBus.subscribe(this);
+        }
     }
 
     private EventSequencingPolicy getSequencingPolicyFor(Object annotatedEventListener) {
@@ -142,14 +168,43 @@ public class AnnotationEventListenerAdapter implements EventListener {
     }
 
     /**
-     * Sets the eventbus that this adapter should subscribe to. If none is provided, the adapter will autowire the
-     * eventBus from the application context. This only works if there is exactly one {@link EventBus} defined in the
-     * application context.
+     * Sets the event bus that this adapter should subscribe to.
      *
      * @param eventBus the EventBus to subscribe to
+     * @see #initialize()
+     * @see #shutdown()
      */
     public void setEventBus(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 
+    private class AnnotatedTransactionAware implements TransactionAware {
+
+        private final AnnotationEventHandlerInvoker eventHandlerInvoker;
+
+        /**
+         * Initialize the Annotated Transaction Aware adapter for the given event handler invoker.
+         *
+         * @param eventHandlerInvoker the invoker to delegate transaction handling to
+         */
+        public AnnotatedTransactionAware(AnnotationEventHandlerInvoker eventHandlerInvoker) {
+            this.eventHandlerInvoker = eventHandlerInvoker;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void beforeTransaction(TransactionStatus transactionStatus) {
+            eventHandlerInvoker.invokeBeforeTransaction(transactionStatus);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void afterTransaction(TransactionStatus transactionStatus) {
+            eventHandlerInvoker.invokeAfterTransaction(transactionStatus);
+        }
+    }
 }

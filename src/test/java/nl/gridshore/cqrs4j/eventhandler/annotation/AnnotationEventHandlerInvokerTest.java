@@ -18,9 +18,11 @@ package nl.gridshore.cqrs4j.eventhandler.annotation;
 
 import nl.gridshore.cqrs4j.DomainEvent;
 import nl.gridshore.cqrs4j.StubDomainEvent;
+import nl.gridshore.cqrs4j.eventhandler.TransactionStatus;
 import org.junit.*;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Allard Buijze
@@ -79,8 +81,21 @@ public class AnnotationEventHandlerInvokerTest {
     */
 
     @Test
-    public void testValidateEventHandler_MultipleParameterHandlerIsRejected() {
+    public void testValidateEventHandler_MoreThan3ParameterHandlerIsRejected() {
         FirstSubclass handler = new IllegalEventHandler();
+        try {
+            AnnotationEventHandlerInvoker.validateHandlerMethods(handler);
+            fail("Expected an UnsupportedHandlerMethodException");
+        }
+        catch (UnsupportedHandlerMethodException e) {
+            assertTrue(e.getMessage().contains("notARealHandler"));
+            assertEquals("notARealHandler", e.getViolatingMethod().getName());
+        }
+    }
+
+    @Test
+    public void testValidateEventHandler_WrongSecondsParameterIsRejected() {
+        FirstSubclass handler = new ASecondIllegalEventHandler();
         try {
             AnnotationEventHandlerInvoker.validateHandlerMethods(handler);
             fail("Expected an UnsupportedHandlerMethodException");
@@ -135,10 +150,41 @@ public class AnnotationEventHandlerInvokerTest {
         }));
     }
 
+    @Test
+    public void testBeforeAndAfterTransactionInvocations_BeforeAndAfterMethodsAvailable() {
+        FirstSubclass handler1 = new SecondSubclass();
+        TransactionStatus status = mock(TransactionStatus.class);
+        testSubject = new AnnotationEventHandlerInvoker(handler1);
+        testSubject.invokeBeforeTransaction(status);
+        try {
+            testSubject.invokeAfterTransaction(status);
+            fail("Expected exception to be propagated");
+        } catch (TransactionMethodExecutionException e) {
+            assertTrue(e.getMessage().contains("afterTransaction"));
+        }
+
+        assertEquals(1, handler1.beforeTransactionCount);
+        assertEquals(1, handler1.afterTransactionCount);
+    }
+
+    @Test
+    public void testBeforeAndAfterTransactionInvocations_OnlyBeforeMethodAvailable() {
+        FirstSubclass handler1 = new FirstSubclass();
+        TransactionStatus status = mock(TransactionStatus.class);
+        testSubject = new AnnotationEventHandlerInvoker(handler1);
+        testSubject.invokeBeforeTransaction(status);
+        testSubject.invokeAfterTransaction(status);
+
+        assertEquals(1, handler1.beforeTransactionCount);
+        assertEquals(0, handler1.afterTransactionCount);
+    }
+
     private static class FirstSubclass {
 
         protected int invocationCount1;
         protected int invocationCount2;
+        protected int beforeTransactionCount;
+        protected int afterTransactionCount;
 
         /*
         return values are allowed, but ignored
@@ -154,6 +200,11 @@ public class AnnotationEventHandlerInvokerTest {
         public void method2(StubEventTwo event) {
             invocationCount2++;
         }
+
+        @BeforeTransaction
+        public void beforeTransaction(TransactionStatus transactionStatus) {
+            beforeTransactionCount++;
+        }
     }
 
     private static class SecondSubclass extends FirstSubclass {
@@ -161,13 +212,28 @@ public class AnnotationEventHandlerInvokerTest {
         protected int invocationCount3;
 
         @EventHandler
-        public void method3(StubEventOne event) {
+        public void method3(StubEventOne event, TransactionStatus transactionStatus) {
             invocationCount3++;
+        }
+
+        @AfterTransaction
+        public void afterTransaction() throws Exception {
+            afterTransactionCount++;
+            throw new Exception("Mock");
         }
 
     }
 
     private static class IllegalEventHandler extends SecondSubclass {
+
+        @EventHandler
+        public void notARealHandler(StubEventTwo event, TransactionStatus transactionStatus,
+                                    String thisParameterMakesItIncompatible) {
+        }
+
+    }
+
+    private static class ASecondIllegalEventHandler extends SecondSubclass {
 
         @EventHandler
         public void notARealHandler(StubEventTwo event, String thisParameterMakesItIncompatible) {
