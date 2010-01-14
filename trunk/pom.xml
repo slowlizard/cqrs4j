@@ -19,7 +19,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <groupId>nl.gridshore.cqrs4j</groupId>
-    <artifactId>cqrs4j-parent</artifactId>
+    <artifactId>cqrs4j</artifactId>
     <version>0.3-SNAPSHOT</version>
     <modules>
         <module>core</module>
@@ -29,7 +29,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>cqrs4j</name>
+    <name>cqrs4j framework</name>
     <description>
         The cqrs4j framework supports developers with the plumbing and wiring required to build a CQRS architecture, by
         providing (abstract) implementations of common CQRS building blocks.
