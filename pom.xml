@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2009. Gridshore
+  ~ Copyright (c) 2010. Gridshore
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,9 +19,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <groupId>nl.gridshore.cqrs4j</groupId>
-    <artifactId>cqrs4j</artifactId>
+    <artifactId>cqrs4j-parent</artifactId>
     <version>0.3-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <modules>
+        <module>core</module>
+        <module>reference-guide</module>
+    </modules>
+    <packaging>pom</packaging>
 
     <modelVersion>4.0.0</modelVersion>
 
