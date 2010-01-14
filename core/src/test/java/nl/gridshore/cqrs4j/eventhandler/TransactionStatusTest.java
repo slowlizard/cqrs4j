@@ -61,6 +61,17 @@ public class TransactionStatusTest {
         assertEquals(1, status.getEventsProcessedSinceLastYield());
     }
 
+    @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "ThrowableInstanceNeverThrown"})
+    @Test
+    public void testTransactionFailure() {
+        assertTrue(status.isSuccessful());
+        assertNull(status.getException());
+        Throwable mockThrowable = new Exception();
+        status.markFailed(mockThrowable);
+        assertFalse(status.isSuccessful());
+        assertSame(mockThrowable, status.getException());
+    }
+
     @Test
     public void testYieldEnforcement() {
         assertEquals(YIELD_AFTER_TRANSACTION, status.getYieldPolicy());
