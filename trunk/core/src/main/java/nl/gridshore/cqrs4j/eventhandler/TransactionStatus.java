@@ -173,7 +173,7 @@ public abstract class TransactionStatus {
      *
      * @return whether the current transaction is successful or not.
      */
-    protected boolean isSuccessful() {
+    public boolean isSuccessful() {
         return exception == null;
     }
 
@@ -183,7 +183,7 @@ public abstract class TransactionStatus {
      *
      * @return the exception that caused the transaction to fail
      */
-    protected Throwable getException() {
+    public Throwable getException() {
         return exception;
     }
 
