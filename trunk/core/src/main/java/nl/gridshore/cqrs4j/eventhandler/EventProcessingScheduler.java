@@ -36,6 +36,7 @@ import static nl.gridshore.cqrs4j.eventhandler.YieldPolicy.DO_NOT_YIELD;
 public class EventProcessingScheduler implements Runnable {
 
     private final EventListener eventListener;
+    private final ShutdownCallback shutDownCallback;
     private final TransactionAware transactionListener;
     private final ExecutorService executorService;
 
@@ -43,15 +44,19 @@ public class EventProcessingScheduler implements Runnable {
     private final Queue<DomainEvent> events = new LinkedList<DomainEvent>();
     // guarded by "this"
     private boolean isScheduled = false;
+    private boolean cleanedUp;
 
     /**
      * Initialize a scheduler for the given <code>eventListener</code> using the given <code>executorService</code>.
      *
-     * @param eventListener   The event listener for which this scheduler schedules events
-     * @param executorService The executor service that will process the events
+     * @param eventListener    The event listener for which this scheduler schedules events
+     * @param executorService  The executor service that will process the events
+     * @param shutDownCallback The callback to notify when the scheduler finishes processing events
      */
-    public EventProcessingScheduler(EventListener eventListener, ExecutorService executorService) {
+    public EventProcessingScheduler(EventListener eventListener, ExecutorService executorService,
+                                    ShutdownCallback shutDownCallback) {
         this.eventListener = eventListener;
+        this.shutDownCallback = shutDownCallback;
         if (eventListener instanceof TransactionAware) {
             this.transactionListener = (TransactionAware) eventListener;
         } else {
@@ -63,13 +68,20 @@ public class EventProcessingScheduler implements Runnable {
     /**
      * Schedules an event for processing. Will schedule a new invoker task if none is currently active.
      * <p/>
+     * If the current scheduler is in the process of being shut down, this method will return false.
+     * <p/>
      * This method is thread safe
      *
      * @param event the event to schedule
+     * @return true if the event was scheduled successfully, false if this scheduler is not available to process events
      */
-    public synchronized void scheduleEvent(DomainEvent event) {
+    public synchronized boolean scheduleEvent(DomainEvent event) {
+        if (cleanedUp) {
+            return false;
+        }
         events.add(event);
         scheduleIfNecessary();
+        return true;
     }
 
     /**
@@ -81,11 +93,7 @@ public class EventProcessingScheduler implements Runnable {
      * @return the next DomainEvent for processing, of null if none is available
      */
     protected synchronized DomainEvent nextEvent() {
-        DomainEvent event = events.poll();
-        if (event == null) {
-            isScheduled = false;
-        }
-        return event;
+        return events.poll();
     }
 
     /**
@@ -106,7 +114,7 @@ public class EventProcessingScheduler implements Runnable {
                 return false;
             }
         } else {
-            isScheduled = false;
+            cleanUp();
         }
         return true;
     }
@@ -143,15 +151,22 @@ public class EventProcessingScheduler implements Runnable {
         TransactionStatus.set(status);
         while (mayContinue) {
             transactionListener.beforeTransaction(status);
+            // TODO: Implement transaction rollback and retry mechanism
             while (!status.isTransactionSizeReached() && (event = nextEvent()) != null) {
                 eventListener.handle(event);
                 status.recordEventProcessed();
             }
             transactionListener.afterTransaction(status);
-            mayContinue = DO_NOT_YIELD.equals(status.getYieldPolicy()) || !yield();
+            mayContinue = (queuedEventCount() > 0 && DO_NOT_YIELD.equals(status.getYieldPolicy())) || !yield();
             status.resetTransactionStatus();
         }
         TransactionStatus.clear();
+    }
+
+    private synchronized void cleanUp() {
+        isScheduled = false;
+        cleanedUp = true;
+        shutDownCallback.afterShutdown(this);
     }
 
     private static class TransactionStatusImpl extends TransactionStatus {
@@ -177,5 +192,20 @@ public class EventProcessingScheduler implements Runnable {
         public void afterTransaction(TransactionStatus transactionStatus) {
         }
 
+    }
+
+    /**
+     * Callback that allows the SequenceManager to receive a notification when this scheduler finishes processing
+     * events.
+     */
+    interface ShutdownCallback {
+
+        /**
+         * Called when event processing is complete. This means that there are no more events waiting and the last
+         * transactional batch has been committed successfully.
+         *
+         * @param scheduler the scheduler that completed processing.
+         */
+        void afterShutdown(EventProcessingScheduler scheduler);
     }
 }
