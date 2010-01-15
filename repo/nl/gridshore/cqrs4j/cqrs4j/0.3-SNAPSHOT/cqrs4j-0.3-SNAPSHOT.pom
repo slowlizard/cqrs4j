@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2009. Gridshore
+  ~ Copyright (c) 2010. Gridshore
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -21,11 +21,15 @@
     <groupId>nl.gridshore.cqrs4j</groupId>
     <artifactId>cqrs4j</artifactId>
     <version>0.3-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <modules>
+        <module>core</module>
+        <module>reference-guide</module>
+    </modules>
+    <packaging>pom</packaging>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>cqrs4j</name>
+    <name>cqrs4j framework</name>
     <description>
         The cqrs4j framework supports developers with the plumbing and wiring required to build a CQRS architecture, by
         providing (abstract) implementations of common CQRS building blocks.
