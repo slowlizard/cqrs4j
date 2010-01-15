@@ -125,8 +125,7 @@ public abstract class LockingRepository<T extends VersionedAggregateRoot> extend
         lockManager.obtainLock(aggregateIdentifier);
         try {
             return super.load(aggregateIdentifier);
-        }
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             lockManager.releaseLock(aggregateIdentifier);
             throw ex;
         }

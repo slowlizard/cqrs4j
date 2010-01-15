@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 class PessimisticLockManager implements LockManager {
 
-    private final ConcurrentHashMap<UUID, ReentrantLock> locks = new ConcurrentHashMap<UUID, ReentrantLock>();
+    private final ConcurrentHashMap<UUID, DisposableLock> locks = new ConcurrentHashMap<UUID, DisposableLock>();
 
     /**
      * {@inheritDoc}
@@ -60,8 +60,15 @@ class PessimisticLockManager implements LockManager {
      */
     @Override
     public void obtainLock(UUID aggregateIdentifier) {
-        createLockIfAbsent(aggregateIdentifier);
-        lockFor(aggregateIdentifier).lock();
+        boolean lockObtained = false;
+        while (!lockObtained) {
+            createLockIfAbsent(aggregateIdentifier);
+            DisposableLock lock = lockFor(aggregateIdentifier);
+            lockObtained = lock.lock();
+            if (!lockObtained) {
+                locks.remove(aggregateIdentifier, lock);
+            }
+        }
     }
 
     /**
@@ -74,18 +81,68 @@ class PessimisticLockManager implements LockManager {
     @Override
     public void releaseLock(UUID aggregateIdentifier) {
         Assert.state(locks.containsKey(aggregateIdentifier), "No lock for this aggregate was ever obtained");
-        lockFor(aggregateIdentifier).unlock();
+        DisposableLock lock = lockFor(aggregateIdentifier);
+        lock.unlock(aggregateIdentifier);
     }
 
     private void createLockIfAbsent(UUID aggregateIdentifier) {
-        locks.putIfAbsent(aggregateIdentifier, new ReentrantLock());
+        if (!locks.contains(aggregateIdentifier)) {
+            locks.putIfAbsent(aggregateIdentifier, new DisposableLock());
+        }
     }
 
     private boolean isLockAvailableFor(UUID aggregateIdentifier) {
         return locks.containsKey(aggregateIdentifier);
     }
 
-    private ReentrantLock lockFor(UUID aggregateIdentifier) {
+    private DisposableLock lockFor(UUID aggregateIdentifier) {
         return locks.get(aggregateIdentifier);
+    }
+
+    private class DisposableLock {
+
+        private ReentrantLock lock;
+        // guarded by "this"
+        private boolean isClosed = false;
+
+        private DisposableLock() {
+            this.lock = new ReentrantLock();
+        }
+
+        public boolean isHeldByCurrentThread() {
+            return lock.isHeldByCurrentThread();
+        }
+
+        public void unlock(UUID aggregateIdentifier) {
+            lock.unlock();
+            if (shutDown()) {
+                locks.remove(aggregateIdentifier);
+            }
+        }
+
+        public synchronized boolean lock() {
+            if (isClosed) {
+                return false;
+            }
+            lock.lock();
+            return true;
+        }
+
+        public synchronized boolean tryLock() {
+            return !isClosed && lock.tryLock();
+        }
+
+        public boolean isLocked() {
+            return lock.isLocked();
+        }
+
+        public synchronized boolean shutDown() {
+            if (lock.tryLock()) {
+                // we now have a lock. We can shut it down.
+                isClosed = true;
+                lock.unlock();
+            }
+            return isClosed;
+        }
     }
 }
