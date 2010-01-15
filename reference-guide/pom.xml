@@ -96,7 +96,7 @@
                             </property>
                             <property>
                                 <name>highlight.xslthl.config.path</name>
-                                <value>file://${project.basedir}/src/main/xslt/highlighting/xslthl-config.xml</value>
+                                <value>file:///${project.basedir}/src/main/xslt/highlighting/xslthl-config.xml</value>
                             </property>
                         </transformerParameters>
                     </options>
