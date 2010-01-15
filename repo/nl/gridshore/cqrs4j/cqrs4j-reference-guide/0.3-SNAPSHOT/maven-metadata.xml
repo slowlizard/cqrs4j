@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>nl.gridshore.cqrs4j</groupId>
+  <artifactId>cqrs4j-reference-guide</artifactId>
+  <version>0.3-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <buildNumber>1</buildNumber>
+    </snapshot>
+    <lastUpdated>20100115101809</lastUpdated>
+  </versioning>
+</metadata>
