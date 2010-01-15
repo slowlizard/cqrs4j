@@ -52,7 +52,7 @@
     </xsl:template>
 
     <xsl:template match='xslthl:keyword' mode="xslthl">
-        <fo:inline font-weight="bold">
+        <fo:inline font-weight="bold" color="#000080">
             <xsl:apply-templates mode="xslthl"/>
         </fo:inline>
     </xsl:template>
@@ -88,7 +88,7 @@
     </xsl:template>
 
     <xsl:template match='xslthl:annotation' mode="xslthl">
-        <fo:inline color="gray">
+        <fo:inline color="#808000">
             <xsl:apply-templates mode="xslthl"/>
         </fo:inline>
     </xsl:template>

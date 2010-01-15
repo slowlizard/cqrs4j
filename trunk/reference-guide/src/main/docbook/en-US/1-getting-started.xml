@@ -15,6 +15,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <chapter id="getting-started" xmlns="http://docbook.org/ns/docbook">
 
     <title>Getting Started</title>
@@ -31,12 +32,43 @@
         <sect2>
             <title>Creating an aggregate</title>
             <para>Some info about creating aggregates</para>
-            <programlisting language="java"><![CDATA[public interface AggregateRoot {
+            <programlistingco>
+                <areaspec units="LineColumn">
+                    <area id="getUncommittedEvents-co" coords="3 41"/>
+                    <area id="getIdentifier-co" coords="4 27"/>
+                    <area id="commitEvents-co" coords="5 26"/>
+                    <area id="getUncommittedEventCount-co" coords="6 37"/>
+                </areaspec>
+                <programlisting language="java"><![CDATA[@Annotated
+public interface AggregateRoot {
     EventStream getUncommittedEvents();
     UUID getIdentifier();
     void commitEvents();
     int getUncommittedEventCount();
 }]]></programlisting>
+            </programlistingco>
+            <calloutlist>
+                <callout arearefs="getUncommittedEvents-co" id="select-uri">
+                    <para>
+                        blabla
+                    </para>
+                </callout>
+                <callout arearefs="getIdentifier-co" id="dataimport-uri">
+                    <para>
+                        some more
+                    </para>
+                </callout>
+                <callout arearefs="commitEvents-co" id="luke-uri">
+                    <para>
+                        jibberish
+                    </para>
+                </callout>
+                <callout arearefs="getUncommittedEventCount-co" id="spellcheck-uri">
+                    <para>
+                        bull
+                    </para>
+                </callout>
+            </calloutlist>
         </sect2>
     </sect1>
 
