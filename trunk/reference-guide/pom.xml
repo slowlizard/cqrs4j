@@ -76,6 +76,16 @@
                             <finalName>reference-guide-${project.version}.pdf</finalName>
                             <stylesheetResource>file:${basedir}/src/main/xslt/main-pdf.xsl</stylesheetResource>
                         </format>
+                        <format>
+                            <formatName>html_single</formatName>
+                            <finalName>index.html</finalName>
+                            <stylesheetResource>file:${basedir}/src/main/xslt/main-html_single.xsl</stylesheetResource>
+                        </format>
+                        <format>
+                            <formatName>html</formatName>
+                            <finalName>index.html</finalName>
+                            <stylesheetResource>file:${basedir}/src/main/xslt/main-html.xsl</stylesheetResource>
+                        </format>
                     </formats>
                     <options>
                         <xincludeSupported>true</xincludeSupported>

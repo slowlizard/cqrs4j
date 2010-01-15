@@ -16,7 +16,6 @@
   -->
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:fo="http://www.w3.org/1999/XSL/Format"
                 xmlns:xslthl="http://xslthl.sf.net"
                 exclude-result-prefixes="xslthl"
                 version='1.0'>
@@ -34,39 +33,39 @@
     <xsl:import href="highlighting/common.xsl"/>
 
     <xsl:template match='xslthl:tag' mode="xslthl">
-        <fo:inline color="#000080">
+        <span style="color: #000080">
             <xsl:apply-templates/>
-        </fo:inline>
+        </span>
     </xsl:template>
 
     <xsl:template match='xslthl:attribute' mode="xslthl">
-        <fo:inline font-weight="bold" color="blue">
+        <strong>
             <xsl:apply-templates/>
-        </fo:inline>
+        </strong>
     </xsl:template>
 
     <xsl:template match='xslthl:value' mode="xslthl">
-        <fo:inline font-weight="bold" color="#008000">
+        <inline font-weight="bold" color="#008000">
             <xsl:apply-templates/>
-        </fo:inline>
+        </inline>
     </xsl:template>
 
     <xsl:template match='xslthl:keyword' mode="xslthl">
-        <fo:inline font-weight="bold" color="#000080">
+        <inline font-weight="bold" color="#000080">
             <xsl:apply-templates mode="xslthl"/>
-        </fo:inline>
+        </inline>
     </xsl:template>
 
     <xsl:template match='xslthl:string' mode="xslthl">
-        <fo:inline font-weight="bold" font-style="italic">
+        <inline font-weight="bold" font-style="italic">
             <xsl:apply-templates mode="xslthl"/>
-        </fo:inline>
+        </inline>
     </xsl:template>
 
     <xsl:template match='xslthl:comment' mode="xslthl">
-        <fo:inline font-style="italic">
+        <inline font-style="italic">
             <xsl:apply-templates mode="xslthl"/>
-        </fo:inline>
+        </inline>
     </xsl:template>
 
     <!--
@@ -88,9 +87,9 @@
     </xsl:template>
 
     <xsl:template match='xslthl:annotation' mode="xslthl">
-        <fo:inline color="#808000">
+        <inline color="#808000">
             <xsl:apply-templates mode="xslthl"/>
-        </fo:inline>
+        </inline>
     </xsl:template>
 
     <xsl:template match='xslthl:directive' mode="xslthl">
@@ -99,9 +98,9 @@
 
     <!-- Not sure which element will be in final XSLTHL 2.0 -->
     <xsl:template match='xslthl:doccomment|xslthl:doctype' mode="xslthl">
-        <fo:inline font-weight="bold">
+        <inline font-weight="bold">
             <xsl:apply-templates mode="xslthl"/>
-        </fo:inline>
+        </inline>
     </xsl:template>
 
 
