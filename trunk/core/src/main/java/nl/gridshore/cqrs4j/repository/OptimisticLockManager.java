@@ -35,21 +35,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 class OptimisticLockManager implements LockManager {
 
-    private final ConcurrentHashMap<UUID, Long> versionMap = new ConcurrentHashMap<UUID, Long>();
+    private final ConcurrentHashMap<UUID, OptimisticLock> locks = new ConcurrentHashMap<UUID, OptimisticLock>();
 
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean validateLock(VersionedAggregateRoot aggregate) {
-        long newVersion = aggregate.getLastCommittedEventSequenceNumber()
-                + aggregate.getUncommittedEventCount();
-        return versionMap.replace(aggregate.getIdentifier(),
-                                  aggregate.getLastCommittedEventSequenceNumber(),
-                                  newVersion)
-                || versionMap.replace(aggregate.getIdentifier(),
-                                      Long.MIN_VALUE,
-                                      newVersion);
+        OptimisticLock lock = locks.get(aggregate.getIdentifier());
+        return lock.validate(aggregate);
     }
 
     /**
@@ -57,7 +51,15 @@ class OptimisticLockManager implements LockManager {
      */
     @Override
     public void obtainLock(UUID aggregateIdentifier) {
-        versionMap.putIfAbsent(aggregateIdentifier, Long.MIN_VALUE);
+        boolean obtained = false;
+        while (!obtained) {
+            locks.putIfAbsent(aggregateIdentifier, new OptimisticLock());
+            OptimisticLock lock = locks.get(aggregateIdentifier);
+            obtained = lock.lock();
+            if (!obtained) {
+                locks.remove(aggregateIdentifier, lock);
+            }
+        }
     }
 
     /**
@@ -65,5 +67,41 @@ class OptimisticLockManager implements LockManager {
      */
     @Override
     public void releaseLock(UUID aggregateIdentifier) {
+        OptimisticLock lock = locks.get(aggregateIdentifier);
+        lock.unlock(aggregateIdentifier);
+    }
+
+    private class OptimisticLock {
+
+        private Long versionNumber;
+        private int lockCount = 0;
+        private boolean closed = false;
+
+        public synchronized boolean validate(VersionedAggregateRoot aggregate) {
+            Long lastCommittedEventSequenceNumber = aggregate.getLastCommittedEventSequenceNumber();
+            if (versionNumber == null || versionNumber.equals(lastCommittedEventSequenceNumber)) {
+                long last = lastCommittedEventSequenceNumber == null ? 0 : lastCommittedEventSequenceNumber;
+                versionNumber = last + aggregate.getUncommittedEventCount();
+                return true;
+            }
+            return false;
+        }
+
+        public synchronized boolean lock() {
+            if (closed) {
+                return false;
+            }
+            lockCount++;
+            return true;
+        }
+
+        public synchronized void unlock(UUID aggregateIdentifier) {
+            lockCount--;
+            if (lockCount == 0) {
+                closed = true;
+                locks.remove(aggregateIdentifier, this);
+            }
+        }
+
     }
 }
