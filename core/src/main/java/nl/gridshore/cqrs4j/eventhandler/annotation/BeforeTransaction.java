@@ -38,8 +38,7 @@ import java.lang.annotation.Target;
  * annotated methods, the behavior is undefined.
  *
  * @author Allard Buijze
- * @see nl.gridshore.cqrs4j.eventhandler.TransactionStatus#isSuccessful()
- * @see nl.gridshore.cqrs4j.eventhandler.TransactionStatus#getException()
+ * @see nl.gridshore.cqrs4j.eventhandler.TransactionStatus#setMaxTransactionSize(int)
  * @since 0.3
  */
 @Documented

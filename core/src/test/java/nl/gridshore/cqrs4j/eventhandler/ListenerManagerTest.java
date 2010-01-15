@@ -26,9 +26,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
@@ -40,12 +39,14 @@ public class ListenerManagerTest {
 
     private EventHandlingSequenceManager testSubject;
     private StubEventListener mockEventListener;
-    private ExecutorService executorService;
+    private ScheduledThreadPoolExecutor executorService;
 
     @Before
     public void setUp() {
         mockEventListener = new StubEventListener();
-        executorService = new ThreadPoolExecutor(25, 100, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());
+        executorService = new ScheduledThreadPoolExecutor(25);
+        executorService.setMaximumPoolSize(100);
+        executorService.setKeepAliveTime(1, TimeUnit.MINUTES);
         testSubject = new EventHandlingSequenceManager(mockEventListener, executorService);
     }
 

@@ -61,10 +61,23 @@ public class EventHandlingSequenceManager {
             if (policy == null) {
                 executorService.submit(new SingleEventHandlerInvocationTask(eventListener, event));
             } else {
-                if (!transactions.containsKey(policy)) {
-                    transactions.putIfAbsent(policy, newProcessingScheduler());
+                scheduleEvent(event, policy);
+            }
+        }
+    }
+
+    private void scheduleEvent(DomainEvent event, Object policy) {
+        boolean eventScheduled = false;
+        while (!eventScheduled) {
+            EventProcessingScheduler currentScheduler = transactions.get(policy);
+            if (currentScheduler == null) {
+                transactions.putIfAbsent(policy, newProcessingScheduler(new TransactionCleanUp(policy)));
+            } else {
+                eventScheduled = currentScheduler.scheduleEvent(event);
+                if (!eventScheduled) {
+                    // we know it can be cleaned up.
+                    transactions.remove(policy, currentScheduler);
                 }
-                transactions.get(policy).scheduleEvent(event);
             }
         }
     }
@@ -73,10 +86,11 @@ public class EventHandlingSequenceManager {
      * Creates a new scheduler instance for the eventListener that schedules events on the executor service for the
      * managed EventListener.
      *
+     * @param shutDownCallback The callback that needs to be notified when the scheduler stops processing.
      * @return a new scheduler instance
      */
-    protected EventProcessingScheduler newProcessingScheduler() {
-        return new EventProcessingScheduler(eventListener, executorService);
+    protected EventProcessingScheduler newProcessingScheduler(TransactionCleanUp shutDownCallback) {
+        return new EventProcessingScheduler(eventListener, executorService, shutDownCallback);
     }
 
     private static class SingleEventHandlerInvocationTask implements Runnable {
@@ -90,8 +104,7 @@ public class EventHandlingSequenceManager {
          * @param eventListener The event listener to invoke the event handler on
          * @param event         the event to send to the event listener
          */
-        public SingleEventHandlerInvocationTask(
-                EventListener eventListener, DomainEvent event) {
+        public SingleEventHandlerInvocationTask(EventListener eventListener, DomainEvent event) {
             this.eventListener = eventListener;
             this.event = event;
         }
@@ -102,6 +115,23 @@ public class EventHandlingSequenceManager {
         @Override
         public void run() {
             eventListener.handle(event);
+        }
+    }
+
+    private final class TransactionCleanUp implements EventProcessingScheduler.ShutdownCallback {
+
+        private final Object policy;
+
+        private TransactionCleanUp(Object policy) {
+            this.policy = policy;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void afterShutdown(EventProcessingScheduler scheduler) {
+            transactions.remove(policy, scheduler);
         }
     }
 }
