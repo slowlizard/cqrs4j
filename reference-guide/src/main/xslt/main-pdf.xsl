@@ -20,7 +20,7 @@
     This XSL is based heavily on the Spring Frameworks' XSL script
 -->
 <!DOCTYPE xsl:stylesheet [
-        <!ENTITY admon_gfx_path     "src/docbkx/images/admons/">
+        <!ENTITY admon_gfx_path     "../resources/images/admons/">
         <!ENTITY copyright "&#xA9;">
         ]>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -43,8 +43,6 @@
         <xsl:attribute name="font-family">
             <xsl:value-of select="$body.font.family"/>
         </xsl:attribute>
-        <xsl:attribute name="margin-left">-5em</xsl:attribute>
-        <xsl:attribute name="margin-right">-5em</xsl:attribute>
     </xsl:attribute-set>
 
     <!--###################################################
@@ -85,13 +83,13 @@
     <xsl:param name="footers.on.blank.pages">0</xsl:param>
 
     <!-- Space between paper border and content (chaotic stuff, don't touch) -->
-    <xsl:param name="page.margin.top">5mm</xsl:param>
-    <xsl:param name="region.before.extent">10mm</xsl:param>
+    <xsl:param name="page.margin.top">15mm</xsl:param>
+    <xsl:param name="region.before.extent">20mm</xsl:param>
     <xsl:param name="body.margin.top">10mm</xsl:param>
 
     <xsl:param name="body.margin.bottom">15mm</xsl:param>
     <xsl:param name="region.after.extent">10mm</xsl:param>
-    <xsl:param name="page.margin.bottom">0mm</xsl:param>
+    <xsl:param name="page.margin.bottom">10mm</xsl:param>
 
     <xsl:param name="page.margin.outer">18mm</xsl:param>
     <xsl:param name="page.margin.inner">18mm</xsl:param>
@@ -127,7 +125,7 @@
    ################################################### -->
 
     <!-- The table width should be adapted to the paper size -->
-    <xsl:param name="default.table.width">17.4cm</xsl:param>
+    <xsl:param name="default.table.width">15.5cm</xsl:param>
 
     <!-- Some padding inside tables -->
     <xsl:attribute-set name="table.cell.padding">
