@@ -15,6 +15,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <chapter id="getting-started" xmlns="http://docbook.org/ns/docbook">
     <title>Getting Started</title>
 
@@ -33,7 +34,7 @@
 
             <programlisting language="xml"><![CDATA[<dependency>
 <groupId>nl.gridshore.cqrs4j</groupId>
-<artifactId>cqrs4j</artifactId>
+<artifactId>cqrs4j-core</artifactId>
 <version>0.3</version>
 </dependency>]]></programlisting>
 
@@ -124,7 +125,7 @@
                 that provides
                 <code>@EventHandler</code>
                 annotation support to your aggregate. See
-                <code>AnnotationSupport</code>
+                <xref linkend="annotation-support"/>
                 for more information.
             </para>
         </sect2>
