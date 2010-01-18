@@ -29,8 +29,8 @@
     <sect1>
         <title>Annotation support for aggregates</title>
 
-        <para>Annotation support is automatically available to all aggregates that extend<code>
-            AbstractAnnotatedAggregateRoot</code>.
+        <para>Annotation support is automatically available to all aggregates that extend
+            <code>AbstractAnnotatedAggregateRoot</code>.
         </para>
         <para>See
             <xref linkend="annotated-event-handler"/>
@@ -71,13 +71,6 @@
                 </listitem>
             </itemizedlist>
         </para>
-        <para>Once the annotation bean post processor (<code>AnnotationEventListenerBeanPostProcessor</code>) is defined
-            in the spring application context, all you need to to is add the bean definitions of your annotated event
-            listeners to the context. That's it.
-        </para>
-        <para>
-            Alternatively, you can wrap each annotated bean in a<code>AnnotationEventListenerAdapter</code>.
-        </para>
         <programlisting language="java"><![CDATA[//Examples of valid event handler signatures:
 public void onSomeEvent(SomeEvent event)
 public Object onSomeEvent(SomeEvent event)
@@ -89,6 +82,14 @@ public void onSomeEvent(SomeEvent event) throws SomeCheckedException
 public void onSomeEvent(SomeEvent event, SomeOtherInformation info)
 public void onSomeEvent(DoesNotExtendDomainEvent event)
 ]]></programlisting>
+
+        <para>Once the annotation bean post processor (<code>AnnotationEventListenerBeanPostProcessor</code>) is defined
+            in the spring application context, all you need to to is add the bean definitions of your annotated event
+            listeners to the context. That's it.
+        </para>
+        <para>
+            Alternatively, you can wrap each annotated bean in a<code>AnnotationEventListenerAdapter</code>.
+        </para>
     </sect1>
 
 </chapter>
