@@ -15,6 +15,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <chapter id="annotation-support" xmlns="http://docbook.org/ns/docbook">
     <title>Annotation Support</title>
 
@@ -60,8 +61,7 @@
                 <listitem>
                     <para>The method must accept 1 or 2 parameters. The first parameter must be a subtype of
                         <code>DomainEvent</code>. The second (optional) parameter is of type
-                        <code>TransactionStatus</code>. See
-                        <xref linkend="transaction-support"/>.
+                        <code>TransactionStatus</code>. See <xref linkend="transaction-support"/>.
                     </para>
                 </listitem>
                 <listitem>Return values are allowed, but are ignored by dispatchers.</listitem>
@@ -87,8 +87,7 @@ public void onSomeEvent(DoesNotExtendDomainEvent event)
             listeners to the context. That's it.
         </para>
         <para>
-            Alternatively, you can wrap each annotated bean in a
-            <code>AnnotationEventListenerAdapter</code>.
+            Alternatively, you can wrap each annotated bean in a <code>AnnotationEventListenerAdapter</code>.
         </para>
     </sect1>
 
