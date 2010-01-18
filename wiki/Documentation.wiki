@@ -1,10 +1,12 @@
 #summary cqrs4j Documentation
 #labels Featured
-#sidebar TableOfContents
+
+
 
 = Getting Started =
+The [http://cqrs4j.googlecode.com/files/reference-guide-0.3.pdf Reference Guide] contains the information you need to get started.
 
-See the [http://cqrs4j.googlecode.com/files/reference-guide-0.3.pdf Reference Guide].
+There is also a [ArchitectureOverview Architecture Overview diagram ] available.
 
 = Bugs and Feature Requests =
 If you discover any bugs, or have any feature requests, please [http://code.google.com/p/cqrs4j/issues/list let me know]. You can also report erroneous or missing documentation.
