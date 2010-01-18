@@ -4,7 +4,7 @@
 
 = Getting Started =
 
-See the [GettingStarted Getting Started] page how you can get a head start with your CQRS implementation using _cqrs4j_
+See the [http://cqrs4j.googlecode.com/files/reference-guide-0.3.pdf Reference Guide].
 
 = Bugs and Feature Requests =
 If you discover any bugs, or have any feature requests, please [http://code.google.com/p/cqrs4j/issues/list let me know]. You can also report erroneous or missing documentation.
