@@ -1,0 +1,1 @@
+![http://cqrs4j.googlecode.com/files/cqrs_architecture.jpg](http://cqrs4j.googlecode.com/files/cqrs_architecture.jpg)
